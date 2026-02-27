@@ -185,7 +185,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
   <div class="tabs">
     <button class="tab active" onclick="showTab('effectif',this)">👥 Effectif</button>
     <button class="tab" onclick="showTab('stats',this)">📊 Stats</button>
-    <button class="tab" onclick="showTab('blessures',this)">🏥 Santé</button>
+    <button class="tab" onclick="showTab('blessures',this);renderInjuries()">🏥 Santé</button>
     <button class="tab" onclick="showTab('historique',this);renderClubHistorique()">📁 Historique</button>
   <button class="tab" onclick="showTab('config',this)">🏟 Club</button>
   </div>
