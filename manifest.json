@@ -1,0 +1,24 @@
+{
+  "name": "Coach Tracker Pro",
+  "short_name": "Coach Tracker",
+  "description": "Application de suivi de match et gestion d'effectif pour coachs de football",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0B0D0F",
+  "theme_color": "#0B0D0F",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
