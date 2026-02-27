@@ -196,6 +196,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
   <button class="tab" onclick="showTab('log',this)">Journal</button>
   <button class="tab" onclick="showTab('notes',this)">Notes</button>
   <button class="tab" onclick="showTab('rapport',this)">Bilan</button>
+  <button class="tab" onclick="showTab('historique',this);renderHistorique()">📁 Historique</button>
   <button class="tab" onclick="showTab('setup',this)">Config</button>
 </div>
 
@@ -240,6 +241,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
     <button class="btn-action btn-grey" onclick="openActionModal('Hors-jeu défensif','🏳️','HJ_DEF','Joueur','',false)"><span class="icon">🏳️</span><span class="label">HJ DÉFENSIF</span><span class="count" id="cnt-HJ_DEF">0</span></button>
   </div>
 
+
+  <!-- BOUTON SÉQUENCE -->
+  <div class="section-title" style="margin-top:8px;">🔗 Séquence de jeu</div>
+  <div style="padding:0 0 8px 0;">
+    <button onclick="openSeqModal()" style="width:100%;padding:14px;background:linear-gradient(135deg,#4a0080,#7b00d4);border:none;border-radius:12px;color:#fff;font-family:var(--fd);font-size:15px;font-weight:900;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+      <span style="font-size:20px">🔗</span> SÉQUENCE DE PASSE <span class="count" id="cnt-SEQ" style="background:rgba(255,255,255,0.2);color:#fff;font-size:11px;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center">0</span>
+    </button>
+  </div>
   <!-- MINI TERRAIN INTÉGRÉ -->
   <div class="section-title" style="margin-top:16px;">📍 Zone de l'action</div>
   <div id="lastActionBadge" style="text-align:center;font-family:var(--fb);font-size:12px;color:var(--muted);margin-bottom:6px;min-height:18px;">Enregistre une action puis sélectionne sa zone</div>
@@ -476,9 +485,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 
 <!-- RAPPORT -->
 <div class="panel" id="panel-rapport">
-  <div class="section-title" style="margin-top:0;">Résumé du match</div>
-  <div id="rapportContent"></div>
-  <button class="btn-export" onclick="exportReport()">📋 EXPORTER LE RAPPORT</button>
+  <div style="display:flex;gap:8px;margin-bottom:10px;">
+    <button onclick="showRapportTab('summary')" id="rtab-summary" style="flex:1;padding:9px;background:var(--accent);border:none;border-radius:8px;color:#000;font-family:var(--fd);font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;">📋 RÉSUMÉ</button>
+    <button onclick="showRapportTab('analyse')" id="rtab-analyse" style="flex:1;padding:9px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fd);font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;">🔬 ANALYSE</button>
+    <button onclick="showRapportTab('heatmap')" id="rtab-heatmap" style="flex:1;padding:9px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fd);font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;">🌡 CHALEUR</button>
+  </div>
+  <div id="rapport-summary">
+    <div class="section-title" style="margin-top:0;">Résumé du match</div>
+    <div id="rapportContent"></div>
+    <button class="btn-export" onclick="exportReport()">📋 EXPORTER LE RAPPORT</button>
+  </div>
+  <div id="rapport-analyse" style="display:none"></div>
+  <div id="rapport-heatmap" style="display:none"></div>
+</div>
+
+<!-- HISTORIQUE -->
+<div class="panel" id="panel-historique">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <div class="section-title" style="margin:0;flex:1" id="histoTitle">Historique</div>
+    <button onclick="archiveCurrentMatch()" style="background:var(--green);border:none;border-radius:8px;padding:7px 12px;color:#000;font-family:var(--fd);font-size:12px;font-weight:900;cursor:pointer">&#128190; ARCHIVER</button>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="histoFilters"></div>
+  <div id="histoSeasonStats"></div>
+  <div id="histoList"></div>
+  <div id="histoDetail" style="display:none"></div>
+  <div id="histoCompare" style="display:none"></div>
 </div>
 
 <!-- SETUP -->
@@ -502,6 +533,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
   <div class="setup-card">
     <div class="section-title" style="margin-top:0">Réinitialisation</div>
     <button onclick="fullReset()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7b0000,#cc0000);border:none;border-radius:10px;color:#fff;font-family:var(--fd);font-weight:900;font-size:14px;letter-spacing:2px;cursor:pointer;">⚠️ NOUVEAU MATCH</button>
+  </div>
+</div>
+
+<!-- MODAL SÉQUENCE DE PASSE -->
+<div class="modal-overlay" id="modalSeq">
+  <div class="modal" style="max-height:85vh;overflow-y:auto;">
+    <div class="modal-title">🔗 Séquence de passe</div>
+    <div id="seqChain" style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;margin-bottom:12px;padding:8px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);align-items:center;">
+      <span id="seqChainEmpty" style="font-family:var(--fd);font-size:11px;color:var(--muted)">Ajoute des joueurs ci-dessous...</span>
+    </div>
+    <div style="font-family:var(--fd);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">JOUEURS SUR LE TERRAIN</div>
+    <div id="seqPlayerBtns" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <button onclick="seqMarkLost()" style="flex:1;padding:10px;background:rgba(255,68,68,0.15);border:1px solid rgba(255,68,68,0.4);border-radius:8px;color:var(--red);font-family:var(--fd);font-size:12px;font-weight:900;cursor:pointer;">💔 PASSE RATÉE (dernier)</button>
+      <button onclick="seqUndo()" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fd);font-size:12px;font-weight:900;cursor:pointer;">↩ ANNULER</button>
+    </div>
+    <div style="font-family:var(--fd);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">RÉSULTAT DE LA SÉQUENCE</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+      <button class="seqEndBtn sel" id="seqEnd-none" onclick="setSeqEnd('none',this)">⏹ En cours / Sans suite</button>
+      <button class="seqEndBtn" id="seqEnd-but" onclick="setSeqEnd('but',this)">⚽ BUT !</button>
+      <button class="seqEndBtn" id="seqEnd-tir" onclick="setSeqEnd('tir',this)">🎯 Tir cadré</button>
+      <button class="seqEndBtn" id="seqEnd-occasion" onclick="setSeqEnd('occasion',this)">🔥 Occasion</button>
+      <button class="seqEndBtn" id="seqEnd-centre" onclick="setSeqEnd('centre',this)">📐 Centre</button>
+      <button class="seqEndBtn" id="seqEnd-perte" onclick="setSeqEnd('perte',this)">💔 Perte de balle</button>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal-cancel" onclick="closeModal('modalSeq')">✕ Annuler</button>
+      <button class="btn-modal-confirm" onclick="confirmSeq()">✓ VALIDER</button>
+    </div>
   </div>
 </div>
 
@@ -1242,8 +1302,8 @@ function showTab(id,tabEl){
 }
 
 // ===== LOG =====
-function addEventToLog(icon,text,zone){
-  const ev={time:getTime(),half:currentHalf,icon,text,zone:zone||''};
+function addEventToLog(icon,text,zone,evType,evPlayerId){
+  const ev={time:getTime(),half:currentHalf,icon,text,zone:zone||'',type:evType||'',playerId:evPlayerId||''};
   events.unshift(ev);renderLog();
   // Mettre à jour le badge dernière action sur le mini-terrain
   const badge=document.getElementById('lastActionBadge');
@@ -1257,7 +1317,7 @@ function addEventToLog(icon,text,zone){
 function tagZonePitch(zoneNum, el){
   if(!events.length)return;
   // Appliquer la zone au dernier événement
-  events[0].zone='Zone '+zoneNum;
+  events[0].zone='Zone '+zoneNum;events[0].zoneNum=zoneNum;
   renderLog();
   // Feedback visuel
   document.querySelectorAll('.pitch-zone').forEach(z=>z.classList.remove('zoned'));
@@ -1348,7 +1408,7 @@ function confirmActionModal(withPlayer){
     if(p2) text+=` (${label2}: ${p2})`;
   }
   incrementCount(key);
-  addEventToLog(icon,text);
+  addEventToLog(icon,text,'',actionKey,withPlayer?roster.find(p=>p.name===text.split(' ')[1])?.id||'':'');
   closeModal('modalAction');
 }
 
@@ -2366,6 +2426,787 @@ function fullReset(){
 
 // ===== INIT =====
 setHalfDuration(45,document.getElementById('dur-45'));
-updateTimerDisplay();renderTacticGrid();renderRoster();</script>
+updateTimerDisplay();renderTacticGrid();renderRoster();
+
+// sequences store
+var sequences = [];
+
+
+// ===== HISTORIQUE =====
+var _histoFilter = 'all';
+var _compareIds = [];
+
+function getMatchHistory() {
+  var d = localStorage.getItem('ct_match_history');
+  return d ? JSON.parse(d) : [];
+}
+
+function saveMatchHistory(h) {
+  localStorage.setItem('ct_match_history', JSON.stringify(h));
+}
+
+function archiveCurrentMatch() {
+  var home = document.getElementById('teamHomeName').textContent || 'NOUS';
+  var away = document.getElementById('teamAwayName').textContent || 'ADV';
+  var comp = document.getElementById('setupComp').value || 'Match';
+  var tac = selectedTactic !== null ? TACTICS[currentFormat][selectedTactic].name + ' (' + currentFormat + 'v' + currentFormat + ')' : 'Non définie';
+  if (scoreHome === 0 && scoreAway === 0 && events.length === 0) {
+    alert('Le match semble vide — joue avant d\'archiver !');
+    return;
+  }
+  if (!confirm('Archiver ce match ?\n' + home + ' ' + scoreHome + ' — ' + scoreAway + ' ' + away)) return;
+  var playerStats = roster.map(function(p) {
+    var goals = events.filter(function(e) { return e.text && e.text.includes('BUT !') && e.text.includes(p.name); }).length;
+    var assists = events.filter(function(e) { return e.text && e.text.toLowerCase().includes('assist') && e.text.includes(p.name); }).length;
+    var yellows = events.filter(function(e) { return e.icon === '🟨' && e.text && e.text.includes(p.name); }).length;
+    var reds = events.filter(function(e) { return e.icon === '🟥' && e.text && e.text.includes(p.name); }).length;
+    return {
+      id: p.id, num: p.num, name: p.name, pos: p.pos,
+      playtime: Math.floor(calcPlaytime(p) / 60),
+      goals: goals, assists: assists, yellowCards: yellows, redCards: reds
+    };
+  });
+  var matchData = {
+    id: Date.now().toString(),
+    date: new Date().toLocaleDateString('fr-FR'),
+    dateTs: Date.now(),
+    home: home, away: away, comp: comp, tactic: tac,
+    format: currentFormat,
+    scoreHome: scoreHome, scoreAway: scoreAway,
+    counts: JSON.parse(JSON.stringify(counts)),
+    events: JSON.parse(JSON.stringify(events)),
+    substitutions: JSON.parse(JSON.stringify(substitutions)),
+    roster: playerStats,
+    notes1: document.getElementById('notes1').value || '',
+    notes2: document.getElementById('notes2').value || ''
+  };
+  var history = getMatchHistory();
+  history.unshift(matchData);
+  saveMatchHistory(history);
+  syncToClubManager(matchData);
+  renderHistorique();
+  alert('Match archivé ! Stats joueurs synchronisées avec le Club Manager.');
+}
+
+function syncToClubManager(matchData) {
+  var cmData = localStorage.getItem('cm2_clubs');
+  if (!cmData) return;
+  var clubs = JSON.parse(cmData);
+  if (!clubs.length) return;
+  var homeUpper = (matchData.home || '').toUpperCase();
+  var targetClub = null;
+  for (var i = 0; i < clubs.length; i++) {
+    var cname = (clubs[i].name || '').toUpperCase();
+    if (cname.indexOf(homeUpper.substring(0, 4)) !== -1 || homeUpper.indexOf(cname.substring(0, 4)) !== -1) {
+      targetClub = clubs[i]; break;
+    }
+  }
+  if (!targetClub) targetClub = clubs[0];
+  if (!targetClub || !targetClub.players) return;
+  (matchData.roster || []).forEach(function(mp) {
+    var cp = null;
+    for (var j = 0; j < targetClub.players.length; j++) {
+      var p = targetClub.players[j];
+      var mpName = (mp.name || '').toLowerCase();
+      var cpFull = ((p.prenom || '') + ' ' + (p.nom || '')).toLowerCase().trim();
+      var cpLast = (p.nom || '').toLowerCase();
+      if (cpFull === mpName || cpFull.indexOf(mpName) !== -1 || mpName.indexOf(cpLast) !== -1 || (cpLast.length > 3 && mpName.indexOf(cpLast.substring(0, 4)) !== -1)) {
+        cp = p; break;
+      }
+    }
+    if (!cp) return;
+    if (!cp.stats) cp.stats = {matchs:0,buts:0,passes:0,tirs:0,cj:0,cr:0,minutes:0};
+    cp.stats.matchs = (cp.stats.matchs || 0) + 1;
+    cp.stats.buts = (cp.stats.buts || 0) + (mp.goals || 0);
+    cp.stats.passes = (cp.stats.passes || 0) + (mp.assists || 0);
+    cp.stats.cj = (cp.stats.cj || 0) + (mp.yellowCards || 0);
+    cp.stats.cr = (cp.stats.cr || 0) + (mp.redCards || 0);
+    cp.stats.minutes = (cp.stats.minutes || 0) + (mp.playtime || 0);
+  });
+  localStorage.setItem('cm2_clubs', JSON.stringify(clubs));
+}
+
+function renderHistorique() {
+  var history = getMatchHistory();
+  var titleEl = document.getElementById('histoTitle');
+  if (titleEl) titleEl.textContent = 'Historique — ' + history.length + ' match' + (history.length !== 1 ? 's' : '');
+  var comps = [];
+  history.forEach(function(m) { var c = m.comp || 'Match'; if (comps.indexOf(c) === -1) comps.push(c); });
+  var fc = document.getElementById('histoFilters');
+  if (!fc) return;
+  var filtersHtml = '<button class="tag ' + (_histoFilter === 'all' ? 'sel' : '') + '" onclick="setHistoFilter(\'all\',this)">Tous</button>';
+  comps.forEach(function(s) {
+    filtersHtml += '<button class="tag ' + (_histoFilter === s ? 'sel' : '') + '" onclick="setHistoFilter(\'' + s + '\',this)">' + s + '</button>';
+  });
+  fc.innerHTML = filtersHtml;
+  var filtered = _histoFilter === 'all' ? history : history.filter(function(m) { return (m.comp || 'Match') === _histoFilter; });
+  renderHistoSeasonStats(filtered);
+  var listEl = document.getElementById('histoList');
+  var detEl = document.getElementById('histoDetail');
+  var cmpEl = document.getElementById('histoCompare');
+  if (detEl) detEl.style.display = 'none';
+  if (cmpEl) cmpEl.style.display = 'none';
+  if (listEl) listEl.style.display = '';
+  _compareIds = [];
+  if (!filtered.length) {
+    if (listEl) listEl.innerHTML = '<div class="empty-log" style="text-align:center;padding:30px"><div style="font-size:36px;margin-bottom:8px">📁</div>Aucun match archivé<br><small>Appuie sur 💾 ARCHIVER après un match</small></div>';
+    return;
+  }
+  var html = '';
+  filtered.forEach(function(m) {
+    var res = m.scoreHome > m.scoreAway ? 'V' : m.scoreHome < m.scoreAway ? 'D' : 'N';
+    var rc = res === 'V' ? 'var(--green)' : res === 'D' ? 'var(--red)' : 'var(--yellow)';
+    var tirs = (m.counts && m.counts['TIR_CADRE']) || 0;
+    var jaunes = (m.counts && m.counts['JAUNE']) || 0;
+    var rempl = (m.substitutions && m.substitutions.length) || 0;
+    var joueurs = (m.roster && m.roster.length) || 0;
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer" onclick="showMatchDetail(\'' + m.id + '\')">';
+    html += '<div style="display:flex;align-items:center;gap:10px">';
+    html += '<div style="background:' + rc + ';color:#000;font-family:var(--fd);font-weight:900;font-size:13px;border-radius:6px;padding:4px 10px">' + res + '</div>';
+    html += '<div style="flex:1"><div style="font-family:var(--fd);font-size:15px;font-weight:700">' + m.home + ' <span style="color:var(--accent)">' + m.scoreHome + ' — ' + m.scoreAway + '</span> ' + m.away + '</div>';
+    html += '<div style="font-family:var(--fd);font-size:10px;color:var(--muted);margin-top:2px">' + m.date + (m.comp ? ' · ' + m.comp : '') + '</div></div>';
+    html += '<input type="checkbox" style="width:18px;height:18px;cursor:pointer" onclick="event.stopPropagation();toggleCompare(\'' + m.id + '\',this)">';
+    html += '</div>';
+    html += '<div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
+    html += '<div style="text-align:center;flex:1"><div style="font-family:var(--fd);font-size:15px;font-weight:900">' + tirs + '</div><div style="font-family:var(--fd);font-size:9px;color:var(--muted)">TIRS</div></div>';
+    html += '<div style="text-align:center;flex:1"><div style="font-family:var(--fd);font-size:15px;font-weight:900">' + jaunes + '🟨</div><div style="font-family:var(--fd);font-size:9px;color:var(--muted)">CARTONS</div></div>';
+    html += '<div style="text-align:center;flex:1"><div style="font-family:var(--fd);font-size:15px;font-weight:900">' + rempl + '</div><div style="font-family:var(--fd);font-size:9px;color:var(--muted)">REMPL.</div></div>';
+    html += '<div style="text-align:center;flex:1"><div style="font-family:var(--fd);font-size:15px;font-weight:900">' + joueurs + '</div><div style="font-family:var(--fd);font-size:9px;color:var(--muted)">JOUEURS</div></div>';
+    html += '</div></div>';
+  });
+  if (filtered.length >= 2) {
+    html += '<div style="margin-top:8px;padding:10px;background:var(--surface2);border-radius:10px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between">';
+    html += '<span style="font-family:var(--fd);font-size:11px;color:var(--muted)">Coche 2 matchs pour les comparer</span>';
+    html += '<button id="btnCompare" onclick="compareMatches()" style="display:none;background:var(--accent);border:none;border-radius:6px;padding:6px 12px;color:#000;font-family:var(--fd);font-size:11px;font-weight:900;cursor:pointer">⚖️ COMPARER</button>';
+    html += '</div>';
+  }
+  if (listEl) listEl.innerHTML = html;
+}
+
+function renderHistoSeasonStats(matches) {
+  var el = document.getElementById('histoSeasonStats');
+  if (!el) return;
+  if (!matches.length) { el.innerHTML = ''; return; }
+  var v = 0, n = 0, d = 0, gf = 0, ga = 0;
+  matches.forEach(function(m) {
+    if (m.scoreHome > m.scoreAway) v++;
+    else if (m.scoreHome < m.scoreAway) d++;
+    else n++;
+    gf += m.scoreHome || 0;
+    ga += m.scoreAway || 0;
+  });
+  el.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">'
+    + '<div style="font-family:var(--fd);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:8px">BILAN SAISON</div>'
+    + '<div style="display:flex;gap:6px">'
+    + '<div style="flex:1;text-align:center;background:rgba(0,230,118,.1);border-radius:8px;padding:8px"><div style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--green)">' + v + '</div><div style="font-family:var(--fd);font-size:8px;color:var(--muted)">VICTOIRES</div></div>'
+    + '<div style="flex:1;text-align:center;background:rgba(255,214,0,.1);border-radius:8px;padding:8px"><div style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--yellow)">' + n + '</div><div style="font-family:var(--fd);font-size:8px;color:var(--muted)">NULS</div></div>'
+    + '<div style="flex:1;text-align:center;background:rgba(255,68,68,.1);border-radius:8px;padding:8px"><div style="font-family:var(--fd);font-size:22px;font-weight:900;color:var(--red)">' + d + '</div><div style="font-family:var(--fd);font-size:8px;color:var(--muted)">DÉFAITES</div></div>'
+    + '<div style="flex:1;text-align:center;background:var(--surface2);border-radius:8px;padding:8px"><div style="font-family:var(--fd);font-size:18px;font-weight:900;color:var(--accent)">' + gf + '—' + ga + '</div><div style="font-family:var(--fd);font-size:8px;color:var(--muted)">BUTS</div></div>'
+    + '</div></div>';
+}
+
+function setHistoFilter(f, el) {
+  _histoFilter = f;
+  document.querySelectorAll('#histoFilters .tag').forEach(function(b) { b.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+  renderHistorique();
+}
+
+function toggleCompare(id, cb) {
+  if (cb.checked) {
+    if (_compareIds.length >= 2) { cb.checked = false; alert('Sélectionne max 2 matchs'); return; }
+    _compareIds.push(id);
+  } else {
+    _compareIds = _compareIds.filter(function(x) { return x !== id; });
+  }
+  var btn = document.getElementById('btnCompare');
+  if (btn) btn.style.display = _compareIds.length === 2 ? '' : 'none';
+}
+
+function showMatchDetail(id) {
+  var history = getMatchHistory();
+  var m = null;
+  for (var i = 0; i < history.length; i++) { if (history[i].id === id) { m = history[i]; break; } }
+  if (!m) return;
+  var listEl = document.getElementById('histoList');
+  var detEl = document.getElementById('histoDetail');
+  if (listEl) listEl.style.display = 'none';
+  if (!detEl) return;
+  detEl.style.display = '';
+  var res = m.scoreHome > m.scoreAway ? '✅ Victoire' : m.scoreHome < m.scoreAway ? '❌ Défaite' : '🟡 Nul';
+  var resColor = m.scoreHome > m.scoreAway ? 'var(--green)' : m.scoreHome < m.scoreAway ? 'var(--red)' : 'var(--yellow)';
+  var goalsEv = (m.events || []).filter(function(e) { return e.text && e.text.includes('BUT !'); });
+  var statsKeys = [['🎯','TIR_CADRE','Tirs cadrés'],['↗️','TIR_NON_CADRE','Tirs ratés'],['🟨','JAUNE','Cartons J'],['🟥','ROUGE','Cartons R'],['🚩','CORNER','Corners'],['⚡','CONTRE','Contres']];
+  var statsHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
+  statsKeys.forEach(function(sk) {
+    statsHtml += '<div style="background:var(--surface);border-radius:8px;padding:9px;border:1px solid var(--border)"><div style="font-family:var(--fd);font-size:9px;color:var(--muted)">' + sk[0] + ' ' + sk[2] + '</div><div style="font-family:var(--fd);font-size:20px;font-weight:900">' + ((m.counts && m.counts[sk[1]]) || 0) + '</div></div>';
+  });
+  statsHtml += '</div>';
+  var goalsHtml = '';
+  if (goalsEv.length) {
+    goalsHtml = '<div class="section-title">⚽ Buts</div>';
+    goalsEv.forEach(function(e) { goalsHtml += '<div class="log-item"><span class="log-time">' + e.time + '</span><span class="log-icon">⚽</span><span class="log-text">' + e.text + '</span></div>'; });
+  }
+  var ptHtml = '';
+  if (m.roster && m.roster.length) {
+    ptHtml = '<div class="section-title">⏱ Temps de jeu</div>';
+    var sorted = m.roster.slice().sort(function(a,b) { return (b.playtime||0)-(a.playtime||0); });
+    sorted.forEach(function(p) { ptHtml += '<div class="stat-row"><span class="stat-label">#' + p.num + ' ' + p.name + '</span><span class="stat-value">' + (p.playtime||0) + '<span style="font-size:11px;color:var(--muted)"> min</span></span></div>'; });
+  }
+  var journalHtml = '<div class="section-title">📋 Journal</div><div style="background:var(--surface2);border-radius:10px;padding:10px;max-height:180px;overflow-y:auto">';
+  if (m.events && m.events.length) {
+    var evCopy = m.events.slice().reverse();
+    evCopy.forEach(function(e) { journalHtml += '<div class="log-item"><span class="log-time">' + e.time + '</span><span class="log-icon">' + e.icon + '</span><span class="log-text">' + e.text + '</span></div>'; });
+  } else { journalHtml += '<div class="empty-log">Journal vide</div>'; }
+  journalHtml += '</div>';
+  var notesHtml = '';
+  if (m.notes1 || m.notes2) {
+    notesHtml = '<div class="section-title">📝 Notes coach</div>';
+    if (m.notes1) notesHtml += '<div style="background:var(--surface);border-radius:8px;padding:10px;margin-bottom:6px;font-size:13px;border:1px solid var(--border)"><b style="font-family:var(--fd);font-size:9px;color:var(--muted)">1ÈRE MI-TEMPS</b><br>' + m.notes1 + '</div>';
+    if (m.notes2) notesHtml += '<div style="background:var(--surface);border-radius:8px;padding:10px;font-size:13px;border:1px solid var(--border)"><b style="font-family:var(--fd);font-size:9px;color:var(--muted)">2ÈME MI-TEMPS</b><br>' + m.notes2 + '</div>';
+  }
+  detEl.innerHTML = '<button onclick="closeMatchDetail()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--text);font-family:var(--fd);font-size:12px;font-weight:700;cursor:pointer;margin-bottom:12px">← Retour</button>'
+    + '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">'
+    + '<div style="font-family:var(--fd);font-size:20px;font-weight:900">' + m.home + ' ' + m.scoreHome + ' — ' + m.scoreAway + ' ' + m.away + '</div>'
+    + '<div style="font-family:var(--fd);font-size:11px;color:var(--muted);margin-top:3px">' + m.date + (m.comp ? ' · ' + m.comp : '') + '</div>'
+    + '<div style="font-family:var(--fd);font-size:13px;font-weight:700;margin-top:6px;color:' + resColor + '">' + res + '</div>'
+    + '</div>'
+    + '<div class="section-title" style="margin-top:0">📊 Stats</div>'
+    + statsHtml + goalsHtml + ptHtml + journalHtml + notesHtml
+    + '<div style="display:flex;gap:8px;margin-top:14px">'
+    + '<button onclick="shareMatch(\'' + id + '\')" style="flex:1;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#000;font-family:var(--fd);font-size:13px;font-weight:900;cursor:pointer">📤 PARTAGER</button>'
+    + '<button onclick="deleteMatch(\'' + id + '\')" style="flex:1;padding:12px;background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.3);border-radius:10px;color:var(--red);font-family:var(--fd);font-size:13px;font-weight:900;cursor:pointer">🗑 SUPPRIMER</button>'
+    + '</div>';
+}
+
+function closeMatchDetail() {
+  var detEl = document.getElementById('histoDetail');
+  var listEl = document.getElementById('histoList');
+  if (detEl) detEl.style.display = 'none';
+  if (listEl) listEl.style.display = '';
+}
+
+function shareMatch(id) {
+  var history = getMatchHistory();
+  var m = null;
+  for (var i = 0; i < history.length; i++) { if (history[i].id === id) { m = history[i]; break; } }
+  if (!m) return;
+  var txt = '=== RAPPORT DE MATCH ===\n';
+  txt += (m.comp ? m.comp + ' — ' : '') + m.date + '\n';
+  txt += m.home + ' ' + m.scoreHome + ' — ' + m.scoreAway + ' ' + m.away + '\n';
+  txt += 'Tactique : ' + (m.tactic || '—') + '\n\n';
+  txt += '--- STATS ---\n';
+  [['Tirs cadrés','TIR_CADRE'],['Corners','CORNER'],['Cartons jaunes','JAUNE'],['Cartons rouges','ROUGE']].forEach(function(kv) {
+    txt += kv[0] + ' : ' + ((m.counts && m.counts[kv[1]]) || 0) + '\n';
+  });
+  txt += '\n--- BUTS ---\n';
+  var goals = (m.events || []).filter(function(e) { return e.text && e.text.includes('BUT !'); });
+  if (goals.length) goals.forEach(function(e) { txt += '[' + e.time + '] ' + e.text + '\n'; });
+  else txt += 'Aucun\n';
+  if (m.notes1) txt += '\n--- NOTES 1ère MT ---\n' + m.notes1 + '\n';
+  if (m.notes2) txt += '\n--- NOTES 2ème MT ---\n' + m.notes2 + '\n';
+  if (navigator.share) {
+    navigator.share({ title: 'Rapport ' + m.home + ' ' + m.scoreHome + '-' + m.scoreAway + ' ' + m.away, text: txt }).catch(function() {});
+  } else {
+    var blob = new Blob([txt], { type: 'text/plain' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'rapport-' + m.date.replace(/\//g, '-') + '.txt';
+    a.click();
+  }
+}
+
+function deleteMatch(id) {
+  if (!confirm('Supprimer ce match de l\'historique ?')) return;
+  var h = getMatchHistory().filter(function(m) { return m.id !== id; });
+  saveMatchHistory(h);
+  renderHistorique();
+}
+
+function compareMatches() {
+  if (_compareIds.length !== 2) { alert('Coche exactement 2 matchs'); return; }
+  var history = getMatchHistory();
+  var m1 = null, m2 = null;
+  history.forEach(function(m) {
+    if (m.id === _compareIds[0]) m1 = m;
+    if (m.id === _compareIds[1]) m2 = m;
+  });
+  if (!m1 || !m2) return;
+  var listEl = document.getElementById('histoList');
+  var cmpEl = document.getElementById('histoCompare');
+  if (listEl) listEl.style.display = 'none';
+  if (!cmpEl) return;
+  cmpEl.style.display = '';
+  var statKeys = [['🎯 Tirs cadrés','TIR_CADRE'],['🟨 Cartons J','JAUNE'],['🚩 Corners','CORNER'],['⚡ Contres','CONTRE']];
+  var html = '<button onclick="closeCompare()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--text);font-family:var(--fd);font-size:12px;font-weight:700;cursor:pointer;margin-bottom:12px">← Retour</button>';
+  html += '<div class="section-title" style="margin-top:0">⚖️ Comparaison</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 60px 1fr;gap:6px;align-items:center;margin-bottom:12px">';
+  html += '<div style="background:var(--surface);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border)"><div style="font-family:var(--fd);font-size:12px;font-weight:700">' + m1.home + ' ' + m1.scoreHome + '-' + m1.scoreAway + ' ' + m1.away + '</div><div style="font-family:var(--fd);font-size:9px;color:var(--muted)">' + m1.date + '</div></div>';
+  html += '<div style="text-align:center;font-family:var(--fd);font-size:12px;color:var(--muted)">VS</div>';
+  html += '<div style="background:var(--surface);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border)"><div style="font-family:var(--fd);font-size:12px;font-weight:700">' + m2.home + ' ' + m2.scoreHome + '-' + m2.scoreAway + ' ' + m2.away + '</div><div style="font-family:var(--fd);font-size:9px;color:var(--muted)">' + m2.date + '</div></div>';
+  html += '</div>';
+  statKeys.forEach(function(sk) {
+    var v1 = (m1.counts && m1.counts[sk[1]]) || 0;
+    var v2 = (m2.counts && m2.counts[sk[1]]) || 0;
+    var c1 = v1 > v2 ? 'color:var(--green)' : '';
+    var c2 = v2 > v1 ? 'color:var(--green)' : '';
+    html += '<div style="display:grid;grid-template-columns:1fr 100px 1fr;gap:6px;align-items:center;margin-bottom:6px">';
+    html += '<div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border)"><div style="font-family:var(--fd);font-size:20px;font-weight:900;' + c1 + '">' + v1 + '</div></div>';
+    html += '<div style="text-align:center;font-family:var(--fd);font-size:9px;color:var(--muted);letter-spacing:1px">' + sk[0] + '</div>';
+    html += '<div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border)"><div style="font-family:var(--fd);font-size:20px;font-weight:900;' + c2 + '">' + v2 + '</div></div>';
+    html += '</div>';
+  });
+  cmpEl.innerHTML = html;
+}
+
+function closeCompare() {
+  var cmpEl = document.getElementById('histoCompare');
+  var listEl = document.getElementById('histoList');
+  if (cmpEl) cmpEl.style.display = 'none';
+  if (listEl) listEl.style.display = '';
+}
+
+
+
+// ===== STYLES SÉQUENCE =====
+(function addSeqStyles() {
+  var s = document.createElement('style');
+  s.textContent = `
+    .seqEndBtn {
+      padding:7px 12px;background:var(--surface2);border:1px solid var(--border);
+      border-radius:8px;color:var(--text);font-family:var(--fd);font-size:11px;
+      font-weight:700;cursor:pointer;letter-spacing:1px;
+    }
+    .seqEndBtn.sel {
+      background:var(--accent);border-color:var(--accent);color:#000;
+    }
+    .seq-node {
+      display:flex;align-items:center;gap:3px;background:var(--surface);
+      border:1px solid var(--border);border-radius:8px;padding:4px 8px;
+      font-family:var(--fd);font-size:12px;font-weight:700;
+    }
+    .seq-node.lost { border-color:var(--red);background:rgba(255,68,68,0.1); }
+    .seq-arrow { color:var(--accent);font-size:14px;font-weight:900; }
+    .rtab-active { background:var(--accent) !important;color:#000 !important;border-color:var(--accent) !important; }
+    .hm-zone { transition:opacity 0.2s; cursor:pointer; }
+    .hm-zone:hover { opacity:0.8; }
+  `;
+  document.head.appendChild(s);
+})();
+
+// ===== SÉQUENCES =====
+var _seqChain = [];
+var _seqEnd = 'none';
+
+function openSeqModal() {
+  _seqChain = [];
+  _seqEnd = 'none';
+  renderSeqChain();
+  renderSeqPlayerBtns();
+  document.querySelectorAll('.seqEndBtn').forEach(function(b) { b.classList.remove('sel'); });
+  var none = document.getElementById('seqEnd-none');
+  if (none) none.classList.add('sel');
+  document.getElementById('modalSeq').classList.add('open');
+}
+
+function renderSeqPlayerBtns() {
+  var el = document.getElementById('seqPlayerBtns');
+  if (!el) return;
+  var onField = roster.filter(function(p) { return p.onField !== false; });
+  if (!onField.length) {
+    el.innerHTML = '<span style="font-family:var(--fd);font-size:11px;color:var(--muted)">Ajoute des joueurs dans l\'onglet Effectif</span>';
+    return;
+  }
+  el.innerHTML = onField.sort(function(a,b) { return (+a.num||99)-(+b.num||99); }).map(function(p) {
+    return '<button onclick="seqAddPlayer(' + p.id + ',\'' + p.num + '\',\'' + p.name + '\')" style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer;color:var(--text)">'
+      + '<span style="color:var(--accent)">#' + p.num + '</span> ' + (p.name ? p.name.split(' ')[0] : '')
+      + '</button>';
+  }).join('');
+}
+
+function seqAddPlayer(id, num, name) {
+  _seqChain.push({ id: id, num: num, name: name, lost: false });
+  renderSeqChain();
+}
+
+function seqMarkLost() {
+  if (!_seqChain.length) return;
+  _seqChain[_seqChain.length - 1].lost = true;
+  renderSeqChain();
+}
+
+function seqUndo() {
+  if (!_seqChain.length) return;
+  _seqChain.pop();
+  renderSeqChain();
+}
+
+function setSeqEnd(val, el) {
+  _seqEnd = val;
+  document.querySelectorAll('.seqEndBtn').forEach(function(b) { b.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+}
+
+function renderSeqChain() {
+  var el = document.getElementById('seqChain');
+  var empty = document.getElementById('seqChainEmpty');
+  if (!el) return;
+  if (!_seqChain.length) {
+    el.innerHTML = '<span id="seqChainEmpty" style="font-family:var(--fd);font-size:11px;color:var(--muted)">Ajoute des joueurs ci-dessous...</span>';
+    return;
+  }
+  var html = '';
+  _seqChain.forEach(function(node, i) {
+    if (i > 0) html += '<span class="seq-arrow">→</span>';
+    html += '<div class="seq-node' + (node.lost ? ' lost' : '') + '">';
+    html += '<span style="color:var(--accent)">#' + node.num + '</span>';
+    if (node.lost) html += ' <span style="color:var(--red);font-size:10px">💔</span>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function confirmSeq() {
+  if (_seqChain.length < 2) { alert('Ajoute au moins 2 joueurs pour une séquence.'); return; }
+  var time = getTimerDisplay();
+  var half = currentHalf;
+  // Build pass pairs
+  var passPairs = [];
+  for (var i = 0; i < _seqChain.length - 1; i++) {
+    passPairs.push({
+      from: _seqChain[i],
+      to: _seqChain[i+1],
+      lost: _seqChain[i].lost
+    });
+  }
+  var lastNode = _seqChain[_seqChain.length - 1];
+  var chainText = _seqChain.map(function(n) { return '#' + n.num; }).join('→');
+  var endLabel = { none:'', but:'⚽ BUT !', tir:'🎯 Tir', occasion:'🔥 Occasion', centre:'📐 Centre', perte:'💔 Perte' };
+  var logText = 'Séquence ' + chainText + (_seqEnd !== 'none' ? ' → ' + endLabel[_seqEnd] : '');
+  var seq = {
+    id: Date.now().toString(),
+    time: time, half: half,
+    chain: _seqChain.slice(),
+    pairs: passPairs,
+    end: _seqEnd,
+    text: logText
+  };
+  sequences.push(seq);
+  // Count
+  if (!counts['SEQ']) counts['SEQ'] = 0;
+  counts['SEQ']++;
+  var cntEl = document.getElementById('cnt-SEQ');
+  if (cntEl) cntEl.textContent = counts['SEQ'];
+  // Log event
+  addEventToLog('🔗', logText, '');
+  // If sequence ends in but, auto-trigger goal
+  closeModal('modalSeq');
+  if (_seqEnd === 'but') {
+    setTimeout(function() {
+      if (confirm('Ouvrir le détail du but ?')) openGoalModal();
+    }, 200);
+  }
+}
+
+// ===== RAPPORT TABS =====
+function showRapportTab(tab) {
+  document.getElementById('rapport-summary').style.display = tab === 'summary' ? '' : 'none';
+  document.getElementById('rapport-analyse').style.display = tab === 'analyse' ? '' : 'none';
+  document.getElementById('rapport-heatmap').style.display = tab === 'heatmap' ? '' : 'none';
+  ['summary','analyse','heatmap'].forEach(function(t) {
+    var btn = document.getElementById('rtab-' + t);
+    if (btn) btn.classList.toggle('rtab-active', t === tab);
+  });
+  if (tab === 'analyse') buildAnalyse();
+  if (tab === 'heatmap') buildHeatmap();
+}
+
+// ===== ANALYSE =====
+function buildAnalyse() {
+  var el = document.getElementById('rapport-analyse');
+  if (!el) return;
+  var half1Events = events.filter(function(e) { return e.half === 1; });
+  var half2Events = events.filter(function(e) { return e.half === 2; });
+  var allSeqs = sequences;
+  var half1Seqs = allSeqs.filter(function(s) { return s.half === 1; });
+  var half2Seqs = allSeqs.filter(function(s) { return s.half === 2; });
+
+  // ── Comparaison 1MT vs 2MT ──
+  var statsKeys = [
+    ['⚽ Buts','BUT'],['🎯 Tirs cadrés','TIR_CADRE'],['↗️ Tirs ratés','TIR_NON_CADRE'],
+    ['🔥 Occasions','OCCASION'],['💔 Pertes','PERTE'],['💪 Récups','RECUP'],
+    ['🟨 Cartons J','JAUNE'],['🔗 Séquences','SEQ']
+  ];
+  function countHalf(evts, key) {
+    if (key === 'SEQ') return evts === half1Events ? half1Seqs.length : half2Seqs.length;
+    return evts.filter(function(e) { return e.type === key; }).length;
+  }
+  var compHtml = '<div class="section-title" style="margin-top:0">⚖️ Comparaison 1ère MT / 2ème MT</div>';
+  compHtml += '<div style="display:grid;grid-template-columns:1fr 80px 1fr;gap:4px;align-items:center;margin-bottom:16px;">';
+  compHtml += '<div style="text-align:center;font-family:var(--fd);font-size:11px;font-weight:900;color:var(--accent);padding:6px">1ÈRE MT</div>';
+  compHtml += '<div></div>';
+  compHtml += '<div style="text-align:center;font-family:var(--fd);font-size:11px;font-weight:900;color:var(--green);padding:6px">2ÈME MT</div>';
+  statsKeys.forEach(function(sk) {
+    var v1 = countHalf(half1Events, sk[1]);
+    var v2 = countHalf(half2Events, sk[1]);
+    var c1 = v1 > v2 ? 'color:var(--accent)' : v1 === v2 ? '' : 'color:var(--muted)';
+    var c2 = v2 > v1 ? 'color:var(--green)' : v2 === v1 ? '' : 'color:var(--muted)';
+    compHtml += '<div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--fd);font-size:20px;font-weight:900;' + c1 + '">' + v1 + '</div></div>';
+    compHtml += '<div style="text-align:center;font-family:var(--fd);font-size:9px;color:var(--muted);letter-spacing:0.5px">' + sk[0] + '</div>';
+    compHtml += '<div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--fd);font-size:20px;font-weight:900;' + c2 + '">' + v2 + '</div></div>';
+  });
+  compHtml += '</div>';
+
+  // ── Circuits de passe ──
+  var circuitHtml = '<div class="section-title">🔗 Circuits de passe fréquents</div>';
+  if (!allSeqs.length) {
+    circuitHtml += '<div style="font-family:var(--fd);font-size:12px;color:var(--muted);padding:12px;text-align:center">Aucune séquence enregistrée</div>';
+  } else {
+    // Count pair frequencies
+    var pairCount = {};
+    allSeqs.forEach(function(seq) {
+      seq.pairs.forEach(function(pair) {
+        if (!pair.lost) {
+          var key = '#' + pair.from.num + '→#' + pair.to.num;
+          pairCount[key] = (pairCount[key] || 0) + 1;
+        }
+      });
+    });
+    var sortedPairs = Object.keys(pairCount).sort(function(a,b) { return pairCount[b] - pairCount[a]; });
+    if (!sortedPairs.length) {
+      circuitHtml += '<div style="font-family:var(--fd);font-size:12px;color:var(--muted);padding:12px;text-align:center">Aucune passe réussie enregistrée</div>';
+    } else {
+      var maxVal = pairCount[sortedPairs[0]];
+      circuitHtml += '<div style="margin-bottom:12px">';
+      sortedPairs.slice(0, 8).forEach(function(key, i) {
+        var val = pairCount[key];
+        var pct = Math.round(val / maxVal * 100);
+        var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.';
+        circuitHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+        circuitHtml += '<div style="font-family:var(--fd);font-size:12px;min-width:16px">' + medal + '</div>';
+        circuitHtml += '<div style="font-family:var(--fd);font-size:13px;font-weight:700;min-width:90px;color:var(--text)">' + key + '</div>';
+        circuitHtml += '<div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">';
+        circuitHtml += '<div style="height:100%;width:' + pct + '%;background:var(--accent);border-radius:4px"></div>';
+        circuitHtml += '</div>';
+        circuitHtml += '<div style="font-family:var(--fd);font-size:13px;font-weight:900;color:var(--accent);min-width:20px;text-align:right">' + val + '</div>';
+        circuitHtml += '</div>';
+      });
+      circuitHtml += '</div>';
+    }
+
+    // Séquences complètes
+    circuitHtml += '<div class="section-title">📋 Séquences enregistrées</div>';
+    allSeqs.slice().reverse().forEach(function(seq) {
+      var endIcons = { none:'', but:'⚽', tir:'🎯', occasion:'🔥', centre:'📐', perte:'💔' };
+      circuitHtml += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:6px">';
+      circuitHtml += '<div style="display:flex;align-items:center;gap:8px">';
+      circuitHtml += '<span style="font-family:var(--fd);font-size:10px;color:var(--muted)">' + seq.time + ' MT' + seq.half + '</span>';
+      circuitHtml += '<div style="display:flex;flex-wrap:wrap;gap:3px;flex:1">';
+      seq.chain.forEach(function(node, i) {
+        if (i > 0) circuitHtml += '<span style="color:var(--accent);font-weight:900">→</span>';
+        circuitHtml += '<span style="font-family:var(--fd);font-size:12px;font-weight:700;' + (node.lost ? 'color:var(--red)' : 'color:var(--text)') + '">#' + node.num + (node.lost ? '💔' : '') + '</span>';
+      });
+      circuitHtml += '</div>';
+      if (seq.end !== 'none') circuitHtml += '<span style="font-size:16px">' + (endIcons[seq.end] || '') + '</span>';
+      circuitHtml += '</div></div>';
+    });
+  }
+
+  // ── Pertes de balle par joueur ──
+  var lossHtml = '<div class="section-title">💔 Pertes de balle par joueur</div>';
+  var lossCount = {};
+  // From individual PERTE events
+  events.filter(function(e) { return e.type === 'PERTE'; }).forEach(function(e) {
+    var name = e.player || 'Non identifié';
+    lossCount[name] = (lossCount[name] || 0) + 1;
+  });
+  // From sequences (lost passes)
+  allSeqs.forEach(function(seq) {
+    seq.pairs.forEach(function(pair) {
+      if (pair.lost) {
+        var name = '#' + pair.from.num + ' ' + pair.from.name;
+        lossCount[name] = (lossCount[name] || 0) + 1;
+      }
+    });
+  });
+  var lossKeys = Object.keys(lossCount).sort(function(a,b) { return lossCount[b] - lossCount[a]; });
+  if (!lossKeys.length) {
+    lossHtml += '<div style="font-family:var(--fd);font-size:12px;color:var(--muted);padding:12px;text-align:center">Aucune perte enregistrée</div>';
+  } else {
+    var maxLoss = lossCount[lossKeys[0]];
+    lossHtml += '<div style="margin-bottom:12px">';
+    lossKeys.forEach(function(name) {
+      var val = lossCount[name];
+      var pct = Math.round(val / maxLoss * 100);
+      lossHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+      lossHtml += '<div style="font-family:var(--fd);font-size:12px;font-weight:700;min-width:110px;color:var(--text)">' + name + '</div>';
+      lossHtml += '<div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">';
+      lossHtml += '<div style="height:100%;width:' + pct + '%;background:var(--red);border-radius:4px"></div>';
+      lossHtml += '</div>';
+      lossHtml += '<div style="font-family:var(--fd);font-size:13px;font-weight:900;color:var(--red);min-width:20px;text-align:right">' + val + '</div>';
+      lossHtml += '</div>';
+    });
+    lossHtml += '</div>';
+  }
+
+  el.innerHTML = compHtml + circuitHtml + lossHtml;
+}
+
+// ===== CARTE DE CHALEUR =====
+function buildHeatmap() {
+  var el = document.getElementById('rapport-heatmap');
+  if (!el) return;
+
+  // Tabs for collective vs individual
+  var playerOpts = '<option value="all">🌡 Collectif</option>';
+  roster.forEach(function(p) {
+    playerOpts += '<option value="' + p.id + '">#' + p.num + ' ' + p.name + '</option>';
+  });
+
+  el.innerHTML = '<div class="section-title" style="margin-top:0">🌡 Carte de chaleur</div>'
+    + '<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">'
+    + '<select id="hmPlayer" onchange="renderHeatmapFor()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:var(--fd);font-size:12px;">' + playerOpts + '</select>'
+    + '<select id="hmType" onchange="renderHeatmapFor()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:var(--fd);font-size:12px;">'
+    + '<option value="all">Toutes actions</option>'
+    + '<option value="PERTE">💔 Pertes</option>'
+    + '<option value="RECUP">💪 Récups</option>'
+    + '<option value="TIR_CADRE">🎯 Tirs cadrés</option>'
+    + '<option value="SEQ">🔗 Séquences</option>'
+    + '</select></div>'
+    + '<div id="hmCanvas" style="position:relative;max-width:280px;margin:0 auto 12px auto;"></div>'
+    + '<div id="hmLegend" style="margin-bottom:8px;"></div>'
+    + '<div id="hmStats" style="font-family:var(--fd);font-size:11px;color:var(--muted);text-align:center"></div>';
+
+  renderHeatmapFor();
+}
+
+function renderHeatmapFor() {
+  var playerId = document.getElementById('hmPlayer') ? document.getElementById('hmPlayer').value : 'all';
+  var typeFilter = document.getElementById('hmType') ? document.getElementById('hmType').value : 'all';
+  var canvas = document.getElementById('hmCanvas');
+  if (!canvas) return;
+
+  // Count events per zone
+  var zoneCounts = {};
+  for (var z = 1; z <= 18; z++) zoneCounts[z] = 0;
+
+  // From regular events
+  events.forEach(function(e) {
+    if (!e.zone) return;
+    var zoneNum = parseInt(e.zone);
+    if (!zoneNum || zoneNum < 1 || zoneNum > 18) return;
+    var typeMatch = typeFilter === 'all' || e.type === typeFilter;
+    var playerMatch = playerId === 'all' || (e.playerId && String(e.playerId) === String(playerId));
+    if (typeMatch && playerMatch) zoneCounts[zoneNum] = (zoneCounts[zoneNum] || 0) + 1;
+  });
+
+  // From sequences
+  if (typeFilter === 'all' || typeFilter === 'SEQ') {
+    sequences.forEach(function(seq) {
+      if (seq.zone) {
+        var zoneNum = parseInt(seq.zone);
+        var playerMatch = playerId === 'all' || seq.chain.some(function(n) { return String(n.id) === String(playerId); });
+        if (playerMatch && zoneNum >= 1 && zoneNum <= 18) {
+          zoneCounts[zoneNum] = (zoneCounts[zoneNum] || 0) + 1;
+        }
+      }
+    });
+  }
+
+  var maxVal = Math.max.apply(null, Object.values(zoneCounts).concat([1]));
+  var totalEvents = Object.values(zoneCounts).reduce(function(a,b) { return a+b; }, 0);
+
+  // Build SVG heatmap - 3 cols x 6 rows like the pitch
+  var W = 192, H = 320;
+  var cols = 3, rows = 6;
+  var cw = W / cols, rh = H / rows;
+
+  function zoneToPos(z) {
+    // Zone 1-3 = row 0 (bottom/defense), 16-18 = row 5 (top/attack)
+    var idx = z - 1;
+    var col = idx % 3;
+    var row = Math.floor(idx / 3);
+    return { col: col, row: rows - 1 - row }; // invert: row 0 = top in SVG
+  }
+
+  function heatColor(val, max) {
+    if (val === 0) return 'rgba(0,0,0,0)';
+    var ratio = val / max;
+    if (ratio < 0.33) {
+      var t = ratio / 0.33;
+      return 'rgba(255,214,0,' + (0.3 + t * 0.4) + ')';
+    } else if (ratio < 0.66) {
+      var t = (ratio - 0.33) / 0.33;
+      return 'rgba(255,' + Math.round(214 - t*146) + ',0,' + (0.6 + t * 0.2) + ')';
+    } else {
+      var t = (ratio - 0.66) / 0.34;
+      return 'rgba(' + Math.round(255) + ',' + Math.round(68 - t*68) + ',0,' + (0.75 + t * 0.25) + ')';
+    }
+  }
+
+  var svgParts = ['<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;display:block;border-radius:8px" xmlns="http://www.w3.org/2000/svg">'];
+  svgParts.push('<rect width="' + W + '" height="' + H + '" fill="#1a4a1a" rx="6"/>');
+
+  // Terrain lines (simplified)
+  svgParts.push('<line x1="0" y1="' + (H/2) + '" x2="' + W + '" y2="' + (H/2) + '" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>');
+  svgParts.push('<rect x="' + (W*0.2) + '" y="' + (H*0.04) + '" width="' + (W*0.6) + '" height="' + (H*0.18) + '" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>');
+  svgParts.push('<rect x="' + (W*0.2) + '" y="' + (H*0.78) + '" width="' + (W*0.6) + '" height="' + (H*0.18) + '" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>');
+  svgParts.push('<circle cx="' + (W/2) + '" cy="' + (H/2) + '" r="30" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>');
+
+  // Grid lines
+  for (var c = 1; c < cols; c++) {
+    svgParts.push('<line x1="' + (c*cw) + '" y1="0" x2="' + (c*cw) + '" y2="' + H + '" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>');
+  }
+  for (var r = 1; r < rows; r++) {
+    svgParts.push('<line x1="0" y1="' + (r*rh) + '" x2="' + W + '" y2="' + (r*rh) + '" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>');
+  }
+
+  // Heat zones
+  for (var z = 1; z <= 18; z++) {
+    var pos = zoneToPos(z);
+    var x = pos.col * cw;
+    var y = pos.row * rh;
+    var val = zoneCounts[z];
+    var color = heatColor(val, maxVal);
+    if (val > 0) {
+      svgParts.push('<rect x="' + x + '" y="' + y + '" width="' + cw + '" height="' + rh + '" fill="' + color + '" rx="2"/>');
+      svgParts.push('<text x="' + (x + cw/2) + '" y="' + (y + rh/2 + 5) + '" text-anchor="middle" font-family="monospace" font-weight="bold" font-size="16" fill="white">' + val + '</text>');
+    }
+    // Zone label (small)
+    svgParts.push('<text x="' + (x + 4) + '" y="' + (y + 12) + '" font-family="monospace" font-size="8" fill="rgba(255,255,255,0.4)">' + z + '</text>');
+  }
+
+  // Labels
+  svgParts.push('<text x="' + (W/2) + '" y="14" text-anchor="middle" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.6)">ATTAQUE</text>');
+  svgParts.push('<text x="' + (W/2) + '" y="' + (H-4) + '" text-anchor="middle" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.6)">DÉFENSE</text>');
+  svgParts.push('</svg>');
+
+  canvas.innerHTML = svgParts.join('');
+
+  // Legend
+  var legendEl = document.getElementById('hmLegend');
+  if (legendEl) {
+    legendEl.innerHTML = '<div style="display:flex;align-items:center;gap:8px;justify-content:center">'
+      + '<div style="width:16px;height:12px;background:rgba(255,214,0,0.5);border-radius:2px"></div>'
+      + '<span style="font-family:var(--fd);font-size:10px;color:var(--muted)">Faible</span>'
+      + '<div style="width:16px;height:12px;background:rgba(255,100,0,0.8);border-radius:2px"></div>'
+      + '<span style="font-family:var(--fd);font-size:10px;color:var(--muted)">Moyen</span>'
+      + '<div style="width:16px;height:12px;background:rgba(255,0,0,1);border-radius:2px"></div>'
+      + '<span style="font-family:var(--fd);font-size:10px;color:var(--muted)">Élevé</span>'
+      + '</div>';
+  }
+
+  var statsEl = document.getElementById('hmStats');
+  if (statsEl) {
+    if (totalEvents === 0) {
+      statsEl.textContent = 'Aucune action avec zone enregistrée — sélectionne une zone après chaque action';
+    } else {
+      var hotZone = Object.keys(zoneCounts).sort(function(a,b) { return zoneCounts[b]-zoneCounts[a]; })[0];
+      statsEl.textContent = totalEvents + ' action(s) · Zone la plus active : ' + hotZone;
+    }
+  }
+}
+
+</script>
 </body>
 </html>
