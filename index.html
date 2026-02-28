@@ -2316,7 +2316,7 @@ function renderPitch(){
   if(Object.keys(pitchAssignment).length===0){
     var fieldPlayers=roster.filter(function(p){return p.status==='field'||p.status==='suspended';});
     tactic.positions.forEach(function(slot,i){
-      if(fieldPlayers[i]) pitchAssignment[i]=fieldPlayers[i].id;
+      if(fieldPlayers[i]) pitchAssignment[i]=Number(fieldPlayers[i].id);
     });
   }
   tactic.positions.forEach(function(slot,i){
@@ -2324,10 +2324,10 @@ function renderPitch(){
     div.className='player-token';
     div.style.left=slot.x+'%';
     div.style.top=slot.y+'%';
-    var pid=pitchAssignment[i];
+    var pid=pitchAssignment[i]?Number(pitchAssignment[i]):null;
     var player=pid?roster.find(function(x){return x.id===pid;}):null;
-    // Only show on pitch if player is field or suspended (not bench/out)
-    var isActive=player&&(player.status==='field'||player.status==='suspended');
+    // Show green for any assigned player
+    var isActive=player!=null;
     var jerseyColor=isActive?'#00E676':'#3a3a3a';
     var numColor=isActive?'#000':'#888';
     var num=player?player.num:'';
@@ -4766,13 +4766,14 @@ function openTacticSlotModal(slotIdx, slotPos){
   _tacticSlotIndex = slotIdx;
   // Build player selector — all roster players
   var sel = document.getElementById('tacticPlayerSelect');
+  if(!sel){ console.error('tacticPlayerSelect not found'); return; }
   sel.innerHTML = '<option value="">— Aucun —</option>';
   roster.forEach(function(p){
     var opt = document.createElement('option');
     opt.value = p.id;
     var statusIcon = p.status==='field'?'🟢':p.status==='bench'?'💺':p.status==='out'?'🔴':'⬜';
     opt.textContent = statusIcon+' '+p.num+' — '+p.name+' ('+p.pos+')';
-    if(pitchAssignment[slotIdx]===p.id) opt.selected=true;
+    if(Number(pitchAssignment[slotIdx])===Number(p.id)) opt.selected=true;
     sel.appendChild(opt);
   });
   // Update num when player changes
@@ -4808,7 +4809,7 @@ function confirmTacticPlayer(){
     if(p && newNum!=='') p.num = newNum;
   }
   // Assign player to slot (or clear if none)
-  if(pid) pitchAssignment[_tacticSlotIndex]=pid;
+  if(pid) pitchAssignment[_tacticSlotIndex]=Number(pid);
   else delete pitchAssignment[_tacticSlotIndex];
   renderRoster();
   renderPitch();
