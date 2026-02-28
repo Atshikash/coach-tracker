@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Coach Tracker Pro</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500&display=swap');
 :root {
-  --bg:#0a0e1a; --surface:#111827; --surface2:#1a2235; --border:#1e2d45;
-  --accent:#00d4ff; --accent2:#ff6b35; --green:#00e676; --red:#ff4444;
-  --yellow:#ffd600; --text:#e8edf5; --muted:#5a6a82;
-  --fd:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif;
+  --bg:#0B0D0F; --surface:#111417; --surface2:#181C20; --border:#232830;
+  --accent:#00E676; --accent2:#FF6B00; --green:#00E676; --red:#FF1744;
+  --yellow:#FFD600; --blue:#00B8FF; --text:#F0F2F5; --muted:#6B7A8D;
+  --fd:'Bebas Neue',sans-serif; --fb:'Inter',sans-serif; --fr:'Rajdhani',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;max-width:640px;margin:0 auto;padding-bottom:110px;}
@@ -142,9 +141,303 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 .zone-red{background:linear-gradient(135deg,#b71c1c,#e53935);}
 .zone-orange{background:linear-gradient(135deg,#e65100,#fb8c00);}
 .zone-green{background:linear-gradient(135deg,#1b5e20,#43a047);}
-.importStatusBtn{padding:7px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fd);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;}
+
+/* ── JERSEY TOKENS ── */
+.player-token{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;z-index:10;}
+.jersey-wrap{position:relative;width:28px;height:28px;}
+.jersey-wrap svg{width:28px;height:28px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7));}
+.jersey-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-44%);font-family:'Bebas Neue',sans-serif;font-size:10px;line-height:1;color:#000;pointer-events:none;}
+.jersey-num.light{color:#fff;}
+.token-name{font-family:'Rajdhani',sans-serif;font-size:7px;font-weight:700;color:#fff;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,1);max-width:36px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;}
+/* ── SECTION TITLE UPDATE ── */
+.section-title{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;display:flex;align-items:center;gap:7px;}
+.section-title::before{content:'';width:2px;height:11px;background:var(--accent);border-radius:1px;display:inline-block;flex-shrink:0;}
+/* ── TABS OVERRIDE ── */
+.tabs{scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;}
+.tab-icon{font-size:14px;line-height:1;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+/* ── HEADER ── */
+.header{border-bottom:2px solid rgba(0,230,118,0.2);}
+.logo-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;}
+.logo-sub{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);}
+/* ── TIMER ── */
+.timer-display{font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:4px;color:var(--accent);}
+.timer-display.running{text-shadow:0 0 20px rgba(0,230,118,0.3);}
+.timer-display.paused{color:var(--yellow);}
+.half-badge{font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;}
+.btn-timer{font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1.5px;}
+/* ── SCORE ── */
+.score-num{font-family:'Bebas Neue',sans-serif;font-size:30px;}
+.score-team{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;}
+/* ── ROSTER ── */
+.roster-num{font-family:'Bebas Neue',sans-serif;font-size:26px;color:rgba(0,230,118,0.5);}
+.roster-name{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;}
+.roster-pos{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;}
+.roster-status{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;}
+/* ── ACTION BUTTONS ── */
+.btn-action{background:var(--surface2);}
+.btn-action::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.btn-green::before{background:var(--accent);}
+.btn-blue::before{background:var(--blue);}
+.btn-yellow::before{background:var(--yellow);}
+.btn-red::before{background:var(--red);}
+.btn-orange::before{background:var(--accent2);}
+.btn-purple::before{background:#CE93D8;}
+.btn-teal::before{background:#26C6DA;}
+.btn-pink::before{background:#F48FB1;}
+.label{font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1.5px;}
+.count{font-family:'Bebas Neue',sans-serif;}
+/* ── LOG ── */
+.log-time{font-family:'Bebas Neue',sans-serif;letter-spacing:1px;}
+.log-text{font-family:'Rajdhani',sans-serif;font-weight:600;}
+/* ── TACTIC CARDS ── */
+.tactic-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;}
+.tactic-desc{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:.5px;}
+/* ── HISTO ── */
+.histo-result{font-family:'Bebas Neue',sans-serif;letter-spacing:1px;}
+.histo-meta{font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px;}
+/* ── RAPPORT STATS ── */
+.rapport-stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;}
+.rapport-stat-lbl{font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1.5px;}
+/* import btn */
+.importStatusBtn{font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1.5px;}
 .importStatusBtn.sel{background:var(--accent);border-color:var(--accent);color:#000;}
+
+
+/* ── MODULE CLUB ── */
+.ctab{padding:8px 14px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .2s;}
+.ctab.active{background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.3);color:var(--accent);}
+.ctab:active{transform:scale(.95);}
+.cpanel{display:none;}
+.cpanel.active{display:block;}
+
+
+/* ══ RESET FORMULAIRES GLOBAL ══ */
+input, select, textarea, button {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+input:not([type="range"]), textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 11px 13px;
+  color: var(--text);
+  font-family: var(--fb);
+  font-size: 14px;
+  font-weight: 500;
+  box-sizing: border-box;
+  -webkit-text-fill-color: var(--text);
+}
+input:focus, textarea:focus {
+  border-color: rgba(0,230,118,0.4);
+  background: rgba(0,230,118,0.04);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+  -webkit-text-fill-color: var(--muted);
+}
+select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 11px 36px 11px 13px;
+  color: var(--text);
+  font-family: var(--fb);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-text-fill-color: var(--text);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7A8D' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+select option {
+  background: #181C20;
+  color: #F0F2F5;
+}
+select:focus {
+  border-color: rgba(0,230,118,0.4);
+}
+
+/* ══ BOUTONS FILTRE / FORMAT ══ */
+.dur-btn, .tag, .format-tab, .note-quick-btn, .seqEndBtn {
+  padding: 7px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+  -webkit-appearance: none;
+}
+.dur-btn:active, .tag:active, .format-tab:active { transform: scale(.95); }
+.dur-btn.sel, .tag.sel, .format-tab.active,
+.dur-btn.active, .seqEndBtn.sel {
+  background: rgba(0,230,118,0.1);
+  border-color: rgba(0,230,118,0.35);
+  color: var(--accent);
+}
+
+/* ══ BOUTONS MODAL ══ */
+.btn-modal-cancel {
+  flex: 1;
+  padding: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.btn-modal-confirm {
+  flex: 2;
+  padding: 13px;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #000;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.btn-apply, .btn-export {
+  width: 100%;
+  padding: 13px;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #000;
+  cursor: pointer;
+  margin-top: 10px;
+  -webkit-appearance: none;
+}
+.btn-danger-full {
+  width: 100%;
+  padding: 13px;
+  background: rgba(255,23,68,0.08);
+  border: 1px solid rgba(255,23,68,0.2);
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  cursor: pointer;
+  margin-top: 8px;
+  -webkit-appearance: none;
+}
+
+/* ══ OPT BUTTONS (modaux) ══ */
+.opt-btn {
+  padding: 8px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.opt-btn.sel {
+  background: rgba(0,230,118,0.1);
+  border-color: rgba(0,230,118,0.35);
+  color: var(--accent);
+}
+
+/* ══ IMPORT STATUS BUTTONS ══ */
+.importStatusBtn {
+  padding: 8px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.importStatusBtn.sel {
+  background: rgba(0,230,118,0.1);
+  border-color: rgba(0,230,118,0.35);
+  color: var(--accent);
+}
+
+/* ══ SETUP INPUTS ══ */
+.setup-input, .modal-input, .notes-area {
+  width: 100%;
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px;
+  padding: 11px 13px;
+  color: var(--text) !important;
+  font-family: var(--fb);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  -webkit-text-fill-color: var(--text) !important;
+  -webkit-appearance: none;
+}
+.modal-select {
+  width: 100%;
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px;
+  padding: 11px 36px 11px 13px;
+  color: var(--text) !important;
+  font-family: var(--fb);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  cursor: pointer;
+  -webkit-text-fill-color: var(--text) !important;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7A8D' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+}
+
 </style>
+<link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Coach Tracker Pro">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#0B0D0F">
 </head>
 <body>
 
@@ -174,7 +467,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- BANNER SETUP RAPIDE -->
-
 <div id="setupBanner" style="background:linear-gradient(135deg,rgba(0,212,255,0.12),rgba(0,212,255,0.04));border-bottom:1px solid rgba(0,212,255,0.25);padding:10px 14px;display:flex;align-items:center;gap:10px;">
   <span style="font-size:18px;">⚡</span>
   <div style="flex:1;">
@@ -191,20 +483,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
   <button onclick="dismissBanner()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px;">✕</button>
 </div>
 
+
 <div class="tabs">
-  <button class="tab active" onclick="showTab('actions',this)">Actions</button>
-  <button class="tab" onclick="showTab('effectif',this)">Effectif</button>
-  <button class="tab" onclick="showTab('adversaire',this)">Adversaire</button>
-  <button class="tab" onclick="showTab('tactique',this)">Tactique</button>
-  <button class="tab" onclick="showTab('log',this)">Journal</button>
-  <button class="tab" onclick="showTab('notes',this)">Notes</button>
-  <button class="tab" onclick="showTab('rapport',this)">Bilan</button>
-  <button class="tab" onclick="showTab('historique',this);renderHistorique()">📁 Historique</button>
-  <button class="tab" onclick="showTab('setup',this)">Config</button>
+  <button class="tab active" onclick="showTab('actions',this)"><span class="tab-icon">⚡</span>Actions</button>
+  <button class="tab" onclick="showTab('effectif',this)"><span class="tab-icon">👥</span>Effectif</button>
+  <button class="tab" onclick="showTab('club',this);renderClubInfoBar()"><span class="tab-icon">🏟</span>Club</button>
+  <button class="tab" onclick="showTab('adversaire',this)"><span class="tab-icon">🔴</span>Adv.</button>
+  <button class="tab" onclick="showTab('tactique',this)"><span class="tab-icon">📐</span>Tactique</button>
+  <button class="tab" onclick="showTab('log',this)"><span class="tab-icon">📋</span>Journal</button>
+  <button class="tab" onclick="showTab('notes',this)"><span class="tab-icon">📝</span>Notes</button>
+  <button class="tab" onclick="showTab('rapport',this)"><span class="tab-icon">📊</span>Bilan</button>
+  <button class="tab" onclick="showTab('historique',this);renderHistorique()"><span class="tab-icon">🗂</span>Histo.</button>
+  <button class="tab" onclick="showTab('setup',this)"><span class="tab-icon">⚙</span>Config</button>
 </div>
 
 <!-- ACTIONS -->
-
 <div class="panel active" id="panel-actions">
   <div class="section-title">⚽ Offensif</div>
   <div class="action-grid">
@@ -231,7 +524,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
   <div class="action-grid three">
     <button class="btn-action btn-yellow" onclick="openCardModal('Carton jaune')"><span class="icon">🟨</span><span class="label">JAUNE</span><span class="count" id="cnt-JAUNE">0</span></button>
     <button class="btn-action btn-red" onclick="openCardModal('Carton rouge')"><span class="icon">🟥</span><span class="label">ROUGE</span><span class="count" id="cnt-ROUGE">0</span></button>
-    <button class="btn-action" onclick="openCartonBlancModal()" style="background:linear-gradient(135deg,#e0e0e0,#bdbdbd);color:#111;"><span class="icon">⬜</span><span class="label">BLANC</span><span class="count" id="cnt-BLANC" style="background:rgba(0,0,0,0.15);">0</span></button>
+    <button class="btn-action btn-grey" onclick="openCartonBlancModal()"><span class="icon" style="font-size:18px;display:inline-block;width:18px;height:22px;background:#fff;border-radius:2px;border:1.5px solid rgba(0,0,0,0.3);"></span><span class="label">CARTON BLANC</span><span class="count" id="cnt-BLANC">0</span></button>
   </div>
   <div class="section-title">⚙️ Transition / Phases</div>
   <div class="action-grid">
@@ -245,8 +538,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
     <button class="btn-action btn-grey" onclick="openActionModal('Hors-jeu défensif','🏳️','HJ_DEF','Joueur','',false)"><span class="icon">🏳️</span><span class="label">HJ DÉFENSIF</span><span class="count" id="cnt-HJ_DEF">0</span></button>
   </div>
 
-  <!-- BOUTON SÉQUENCE -->
 
+  <!-- BOUTON SÉQUENCE -->
   <div class="section-title" style="margin-top:8px;">🔗 Séquence de jeu</div>
   <div style="padding:0 0 8px 0;">
     <button onclick="openSeqModal()" style="width:100%;padding:14px;background:linear-gradient(135deg,#4a0080,#7b00d4);border:none;border-radius:12px;color:#fff;font-family:var(--fd);font-size:15px;font-weight:900;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
@@ -269,117 +562,113 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
       <!-- Fond -->
       <rect width="192" height="320" fill="#265c26" rx="6"/>
 
-```
-  <!-- ══ ZONES : 3 cols (64px each) × 6 rows (≈53px each) ══
-       y part de 0 (haut=attaque) à 320 (bas=défense)
-       Rangée 6 haut  y:0   h:53  zones 16,17,18  vert foncé
-       Rangée 5       y:53  h:54  zones 13,14,15  vert
-       Rangée 4       y:107 h:53  zones 10,11,12  vert clair / orange
-       Rangée 3       y:160 h:54  zones  7, 8, 9  orange
-       Rangée 2       y:214 h:53  zones  4, 5, 6  rouge clair
-       Rangée 1 bas   y:267 h:53  zones  1, 2, 3  rouge foncé  -->
+      <!-- ══ ZONES : 3 cols (64px each) × 6 rows (≈53px each) ══
+           y part de 0 (haut=attaque) à 320 (bas=défense)
+           Rangée 6 haut  y:0   h:53  zones 16,17,18  vert foncé
+           Rangée 5       y:53  h:54  zones 13,14,15  vert
+           Rangée 4       y:107 h:53  zones 10,11,12  vert clair / orange
+           Rangée 3       y:160 h:54  zones  7, 8, 9  orange
+           Rangée 2       y:214 h:53  zones  4, 5, 6  rouge clair
+           Rangée 1 bas   y:267 h:53  zones  1, 2, 3  rouge foncé  -->
 
-  <!-- Rangée 6 — zones 16,17,18 — ATTAQUE HAUTE (vert intense) -->
-  <rect x="0"   y="0"   width="64" height="53" fill="rgba(56,142,60,0.45)"  class="pitch-zone" onclick="tagZonePitch(16,this)"/>
-  <rect x="64"  y="0"   width="64" height="53" fill="rgba(56,142,60,0.45)"  class="pitch-zone" onclick="tagZonePitch(17,this)"/>
-  <rect x="128" y="0"   width="64" height="53" fill="rgba(56,142,60,0.45)"  class="pitch-zone" onclick="tagZonePitch(18,this)"/>
-  <!-- Rangée 5 — zones 13,14,15 — ATTAQUE (vert moyen) -->
-  <rect x="0"   y="53"  width="64" height="54" fill="rgba(76,175,80,0.32)"  class="pitch-zone" onclick="tagZonePitch(13,this)"/>
-  <rect x="64"  y="53"  width="64" height="54" fill="rgba(76,175,80,0.32)"  class="pitch-zone" onclick="tagZonePitch(14,this)"/>
-  <rect x="128" y="53"  width="64" height="54" fill="rgba(76,175,80,0.32)"  class="pitch-zone" onclick="tagZonePitch(15,this)"/>
-  <!-- Rangée 4 — zones 10,11,12 — MILIEU OFFENSIF (orange clair) -->
-  <rect x="0"   y="107" width="64" height="53" fill="rgba(251,140,0,0.25)"  class="pitch-zone" onclick="tagZonePitch(10,this)"/>
-  <rect x="64"  y="107" width="64" height="53" fill="rgba(251,140,0,0.25)"  class="pitch-zone" onclick="tagZonePitch(11,this)"/>
-  <rect x="128" y="107" width="64" height="53" fill="rgba(251,140,0,0.25)"  class="pitch-zone" onclick="tagZonePitch(12,this)"/>
-  <!-- Rangée 3 — zones 7,8,9 — MILIEU DÉFENSIF (orange) -->
-  <rect x="0"   y="160" width="64" height="54" fill="rgba(251,140,0,0.35)"  class="pitch-zone" onclick="tagZonePitch(7,this)"/>
-  <rect x="64"  y="160" width="64" height="54" fill="rgba(251,140,0,0.35)"  class="pitch-zone" onclick="tagZonePitch(8,this)"/>
-  <rect x="128" y="160" width="64" height="54" fill="rgba(251,140,0,0.35)"  class="pitch-zone" onclick="tagZonePitch(9,this)"/>
-  <!-- Rangée 2 — zones 4,5,6 — DÉFENSE (rouge clair) -->
-  <rect x="0"   y="214" width="64" height="53" fill="rgba(229,57,53,0.30)"  class="pitch-zone" onclick="tagZonePitch(4,this)"/>
-  <rect x="64"  y="214" width="64" height="53" fill="rgba(229,57,53,0.30)"  class="pitch-zone" onclick="tagZonePitch(5,this)"/>
-  <rect x="128" y="214" width="64" height="53" fill="rgba(229,57,53,0.30)"  class="pitch-zone" onclick="tagZonePitch(6,this)"/>
-  <!-- Rangée 1 — zones 1,2,3 — DÉFENSE PROFONDE (rouge intense) -->
-  <rect x="0"   y="267" width="64" height="53" fill="rgba(198,40,40,0.45)"  class="pitch-zone" onclick="tagZonePitch(1,this)"/>
-  <rect x="64"  y="267" width="64" height="53" fill="rgba(198,40,40,0.45)"  class="pitch-zone" onclick="tagZonePitch(2,this)"/>
-  <rect x="128" y="267" width="64" height="53" fill="rgba(198,40,40,0.45)"  class="pitch-zone" onclick="tagZonePitch(3,this)"/>
+      <!-- Rangée 6 — zones 16,17,18 — ATTAQUE HAUTE (vert intense) -->
+      <rect x="0"   y="0"   width="64" height="53" fill="rgba(56,142,60,0.45)"  class="pitch-zone" onclick="tagZonePitch(16,this)"/>
+      <rect x="64"  y="0"   width="64" height="53" fill="rgba(56,142,60,0.45)"  class="pitch-zone" onclick="tagZonePitch(17,this)"/>
+      <rect x="128" y="0"   width="64" height="53" fill="rgba(56,142,60,0.45)"  class="pitch-zone" onclick="tagZonePitch(18,this)"/>
+      <!-- Rangée 5 — zones 13,14,15 — ATTAQUE (vert moyen) -->
+      <rect x="0"   y="53"  width="64" height="54" fill="rgba(76,175,80,0.32)"  class="pitch-zone" onclick="tagZonePitch(13,this)"/>
+      <rect x="64"  y="53"  width="64" height="54" fill="rgba(76,175,80,0.32)"  class="pitch-zone" onclick="tagZonePitch(14,this)"/>
+      <rect x="128" y="53"  width="64" height="54" fill="rgba(76,175,80,0.32)"  class="pitch-zone" onclick="tagZonePitch(15,this)"/>
+      <!-- Rangée 4 — zones 10,11,12 — MILIEU OFFENSIF (orange clair) -->
+      <rect x="0"   y="107" width="64" height="53" fill="rgba(251,140,0,0.25)"  class="pitch-zone" onclick="tagZonePitch(10,this)"/>
+      <rect x="64"  y="107" width="64" height="53" fill="rgba(251,140,0,0.25)"  class="pitch-zone" onclick="tagZonePitch(11,this)"/>
+      <rect x="128" y="107" width="64" height="53" fill="rgba(251,140,0,0.25)"  class="pitch-zone" onclick="tagZonePitch(12,this)"/>
+      <!-- Rangée 3 — zones 7,8,9 — MILIEU DÉFENSIF (orange) -->
+      <rect x="0"   y="160" width="64" height="54" fill="rgba(251,140,0,0.35)"  class="pitch-zone" onclick="tagZonePitch(7,this)"/>
+      <rect x="64"  y="160" width="64" height="54" fill="rgba(251,140,0,0.35)"  class="pitch-zone" onclick="tagZonePitch(8,this)"/>
+      <rect x="128" y="160" width="64" height="54" fill="rgba(251,140,0,0.35)"  class="pitch-zone" onclick="tagZonePitch(9,this)"/>
+      <!-- Rangée 2 — zones 4,5,6 — DÉFENSE (rouge clair) -->
+      <rect x="0"   y="214" width="64" height="53" fill="rgba(229,57,53,0.30)"  class="pitch-zone" onclick="tagZonePitch(4,this)"/>
+      <rect x="64"  y="214" width="64" height="53" fill="rgba(229,57,53,0.30)"  class="pitch-zone" onclick="tagZonePitch(5,this)"/>
+      <rect x="128" y="214" width="64" height="53" fill="rgba(229,57,53,0.30)"  class="pitch-zone" onclick="tagZonePitch(6,this)"/>
+      <!-- Rangée 1 — zones 1,2,3 — DÉFENSE PROFONDE (rouge intense) -->
+      <rect x="0"   y="267" width="64" height="53" fill="rgba(198,40,40,0.45)"  class="pitch-zone" onclick="tagZonePitch(1,this)"/>
+      <rect x="64"  y="267" width="64" height="53" fill="rgba(198,40,40,0.45)"  class="pitch-zone" onclick="tagZonePitch(2,this)"/>
+      <rect x="128" y="267" width="64" height="53" fill="rgba(198,40,40,0.45)"  class="pitch-zone" onclick="tagZonePitch(3,this)"/>
 
-  <!-- ══ LIGNES DU TERRAIN ══ -->
-  <!-- Contour -->
-  <rect x="1" y="1" width="190" height="318" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" rx="5"/>
-  <!-- Ligne médiane -->
-  <line x1="1" y1="160" x2="191" y2="160" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
-  <!-- Cercle central -->
-  <circle cx="96" cy="160" r="30" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
-  <circle cx="96" cy="160" r="2"  fill="rgba(255,255,255,0.8)"/>
-  <!-- Surface adverse (haut) -->
-  <rect x="44" y="1"   width="104" height="42" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
-  <rect x="70" y="1"   width="52"  height="18" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
-  <!-- But adverse -->
-  <rect x="78" y="0"   width="36"  height="6"  fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
-  <!-- Surface notre camp (bas) -->
-  <rect x="44" y="277" width="104" height="42" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
-  <rect x="70" y="301" width="52"  height="18" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
-  <!-- Notre but -->
-  <rect x="78" y="314" width="36"  height="6"  fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
-  <!-- Points penalty -->
-  <circle cx="96" cy="52"  r="2" fill="rgba(255,255,255,0.6)"/>
-  <circle cx="96" cy="268" r="2" fill="rgba(255,255,255,0.6)"/>
-  <!-- Séparateurs verticaux zones (2 lignes pour 3 cols) -->
-  <line x1="64"  y1="1" x2="64"  y2="319" stroke="rgba(255,255,255,0.22)" stroke-width="0.8" stroke-dasharray="4,3"/>
-  <line x1="128" y1="1" x2="128" y2="319" stroke="rgba(255,255,255,0.22)" stroke-width="0.8" stroke-dasharray="4,3"/>
-  <!-- Séparateurs horizontaux zones (5 lignes pour 6 rangées) -->
-  <line x1="1" y1="53"  x2="191" y2="53"  stroke="rgba(255,255,255,0.18)" stroke-width="0.8" stroke-dasharray="4,3"/>
-  <line x1="1" y1="107" x2="191" y2="107" stroke="rgba(255,255,255,0.22)" stroke-width="1"   stroke-dasharray="4,3"/>
-  <line x1="1" y1="214" x2="191" y2="214" stroke="rgba(255,255,255,0.22)" stroke-width="1"   stroke-dasharray="4,3"/>
-  <line x1="1" y1="267" x2="191" y2="267" stroke="rgba(255,255,255,0.18)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <!-- ══ LIGNES DU TERRAIN ══ -->
+      <!-- Contour -->
+      <rect x="1" y="1" width="190" height="318" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" rx="5"/>
+      <!-- Ligne médiane -->
+      <line x1="1" y1="160" x2="191" y2="160" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
+      <!-- Cercle central -->
+      <circle cx="96" cy="160" r="30" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
+      <circle cx="96" cy="160" r="2"  fill="rgba(255,255,255,0.8)"/>
+      <!-- Surface adverse (haut) -->
+      <rect x="44" y="1"   width="104" height="42" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
+      <rect x="70" y="1"   width="52"  height="18" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+      <!-- But adverse -->
+      <rect x="78" y="0"   width="36"  height="6"  fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
+      <!-- Surface notre camp (bas) -->
+      <rect x="44" y="277" width="104" height="42" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
+      <rect x="70" y="301" width="52"  height="18" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+      <!-- Notre but -->
+      <rect x="78" y="314" width="36"  height="6"  fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
+      <!-- Points penalty -->
+      <circle cx="96" cy="52"  r="2" fill="rgba(255,255,255,0.6)"/>
+      <circle cx="96" cy="268" r="2" fill="rgba(255,255,255,0.6)"/>
+      <!-- Séparateurs verticaux zones (2 lignes pour 3 cols) -->
+      <line x1="64"  y1="1" x2="64"  y2="319" stroke="rgba(255,255,255,0.22)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <line x1="128" y1="1" x2="128" y2="319" stroke="rgba(255,255,255,0.22)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <!-- Séparateurs horizontaux zones (5 lignes pour 6 rangées) -->
+      <line x1="1" y1="53"  x2="191" y2="53"  stroke="rgba(255,255,255,0.18)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <line x1="1" y1="107" x2="191" y2="107" stroke="rgba(255,255,255,0.22)" stroke-width="1"   stroke-dasharray="4,3"/>
+      <line x1="1" y1="214" x2="191" y2="214" stroke="rgba(255,255,255,0.22)" stroke-width="1"   stroke-dasharray="4,3"/>
+      <line x1="1" y1="267" x2="191" y2="267" stroke="rgba(255,255,255,0.18)" stroke-width="0.8" stroke-dasharray="4,3"/>
 
-  <!-- ══ NUMÉROS ══ (centré dans chaque zone : cx=32,96,160 / cy=centre rangée) -->
-  <!-- Rangée 6 (y:0-53, cy=26)   → 16,17,18 -->
-  <text x="32"  y="31" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">16</text>
-  <text x="96"  y="31" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">17</text>
-  <text x="160" y="31" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">18</text>
-  <!-- Rangée 5 (y:53-107, cy=80) → 13,14,15 -->
-  <text x="32"  y="85" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">13</text>
-  <text x="96"  y="85" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">14</text>
-  <text x="160" y="85" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">15</text>
-  <!-- Rangée 4 (y:107-160, cy=133) → 10,11,12 -->
-  <text x="32"  y="138" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">10</text>
-  <text x="96"  y="138" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">11</text>
-  <text x="160" y="138" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">12</text>
-  <!-- Rangée 3 (y:160-214, cy=187) → 7,8,9 -->
-  <text x="32"  y="192" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">7</text>
-  <text x="96"  y="192" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">8</text>
-  <text x="160" y="192" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">9</text>
-  <!-- Rangée 2 (y:214-267, cy=240) → 4,5,6 -->
-  <text x="32"  y="245" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">4</text>
-  <text x="96"  y="245" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">5</text>
-  <text x="160" y="245" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">6</text>
-  <!-- Rangée 1 (y:267-320, cy=293) → 1,2,3 -->
-  <text x="32"  y="298" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">1</text>
-  <text x="96"  y="298" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">2</text>
-  <text x="160" y="298" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">3</text>
+      <!-- ══ NUMÉROS ══ (centré dans chaque zone : cx=32,96,160 / cy=centre rangée) -->
+      <!-- Rangée 6 (y:0-53, cy=26)   → 16,17,18 -->
+      <text x="32"  y="31" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">16</text>
+      <text x="96"  y="31" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">17</text>
+      <text x="160" y="31" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">18</text>
+      <!-- Rangée 5 (y:53-107, cy=80) → 13,14,15 -->
+      <text x="32"  y="85" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">13</text>
+      <text x="96"  y="85" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">14</text>
+      <text x="160" y="85" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">15</text>
+      <!-- Rangée 4 (y:107-160, cy=133) → 10,11,12 -->
+      <text x="32"  y="138" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">10</text>
+      <text x="96"  y="138" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">11</text>
+      <text x="160" y="138" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">12</text>
+      <!-- Rangée 3 (y:160-214, cy=187) → 7,8,9 -->
+      <text x="32"  y="192" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">7</text>
+      <text x="96"  y="192" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">8</text>
+      <text x="160" y="192" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.8)">9</text>
+      <!-- Rangée 2 (y:214-267, cy=240) → 4,5,6 -->
+      <text x="32"  y="245" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">4</text>
+      <text x="96"  y="245" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">5</text>
+      <text x="160" y="245" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.85)">6</text>
+      <!-- Rangée 1 (y:267-320, cy=293) → 1,2,3 -->
+      <text x="32"  y="298" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">1</text>
+      <text x="96"  y="298" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">2</text>
+      <text x="160" y="298" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="rgba(255,255,255,0.9)">3</text>
 
-  <!-- Labels -->
-  <text x="96" y="14" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="8" font-weight="700" fill="rgba(255,255,255,0.5)" letter-spacing="2">⚽ ATTAQUE</text>
-  <text x="96" y="313" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="8" font-weight="700" fill="rgba(255,255,255,0.5)" letter-spacing="2">🛡 DÉFENSE</text>
-<!-- Overlay confirmation zone -->
-<div id="zoneConfirmOverlay" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,212,255,0.92);color:#0a0e1a;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;padding:8px 18px;border-radius:20px;pointer-events:none;letter-spacing:1px;"></div>
-```
-
+      <!-- Labels -->
+      <text x="96" y="14" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="8" font-weight="700" fill="rgba(255,255,255,0.5)" letter-spacing="2">⚽ ATTAQUE</text>
+      <text x="96" y="313" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="8" font-weight="700" fill="rgba(255,255,255,0.5)" letter-spacing="2">🛡 DÉFENSE</text>
+    <!-- Overlay confirmation zone -->
+    <div id="zoneConfirmOverlay" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,212,255,0.92);color:#0a0e1a;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;padding:8px 18px;border-radius:20px;pointer-events:none;letter-spacing:1px;"></div>
   </div>
   <div id="zonedEventLabel" style="text-align:center;font-family:var(--fb);font-size:11px;color:var(--accent);min-height:16px;margin-bottom:4px;"></div>
 </div>
 
 <!-- EFFECTIF -->
-
 <div class="panel" id="panel-effectif">
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
     <div class="section-title" style="margin:0;flex:1;">Effectif du match</div>
+    <button onclick="openImportCMModal()" style="background:linear-gradient(135deg,#0E5C14,#1A8C23);border:none;border-radius:6px;padding:7px 10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">📥 IMPORTER</button>
     <button onclick="openAddPlayerModal()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 12px;color:var(--bg);font-family:var(--fd);font-size:13px;font-weight:900;cursor:pointer;letter-spacing:1px;">+ JOUEUR</button>
     <button onclick="openSubModal(null)" style="background:var(--accent2);border:none;border-radius:8px;padding:7px 12px;color:#fff;font-family:var(--fd);font-size:13px;font-weight:900;cursor:pointer;letter-spacing:1px;">🔄 REM.</button>
   </div>
-  <button onclick="openImportCMModal()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1B5E20,#2E7D32);border:none;border-radius:10px;color:#fff;font-family:var(--fd);font-size:13px;font-weight:900;cursor:pointer;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;"><span>📥</span> IMPORTER DEPUIS CLUB MANAGER</button>
   <div style="display:flex;gap:6px;margin-bottom:12px;" id="rosterFilterBtns">
     <button class="tag sel" onclick="filterRoster('all',this)">Tous</button>
     <button class="tag" onclick="filterRoster('field',this)">🟢 Terrain</button>
@@ -392,6 +681,187 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- ADVERSAIRE -->
+<!-- ══ PANEL CLUB ══ -->
+<div class="panel" id="panel-club">
+
+  <!-- SOUS-ONGLETS CLUB -->
+  <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;">
+    <button class="ctab active" id="ctab-roster" onclick="showClubTab('roster',this)"><span style="font-size:14px;">👥</span> Effectif</button>
+    <button class="ctab" id="ctab-health" onclick="showClubTab('health',this)"><span style="font-size:14px;">🏥</span> Santé</button>
+    <button class="ctab" id="ctab-stats" onclick="showClubTab('stats',this)"><span style="font-size:14px;">📊</span> Stats</button>
+    <button class="ctab" id="ctab-season" onclick="showClubTab('season',this)"><span style="font-size:14px;">📁</span> Saison</button>
+    <button class="ctab" id="ctab-clubcfg" onclick="showClubTab('clubcfg',this)"><span style="font-size:14px;">⚙</span> Club</button>
+  </div>
+
+  <!-- FORMAT SWITCHER -->
+  <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Format :</div>
+    <button class="dur-btn sel" id="clubFmt11" onclick="setClubFormat(11,this)">Football à 11</button>
+    <button class="dur-btn" id="clubFmt8" onclick="setClubFormat(8,this)">Football à 8</button>
+  </div>
+
+  <!-- CLUB INFO BAR -->
+  <div id="clubInfoBar" style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">
+    <div id="clubLogoDisplay" style="width:38px;height:38px;border-radius:7px;background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⚽</div>
+    <div style="flex:1;">
+      <div id="clubNameDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--text);line-height:1;">MON CLUB</div>
+      <div id="clubMetaDisplay" style="font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:2px;">Saison 2025-2026</div>
+    </div>
+    <div id="clubQuickStats" style="display:flex;gap:12px;"></div>
+  </div>
+
+  <!-- SUB-PANELS -->
+
+  <!-- EFFECTIF -->
+  <div id="cpanel-roster" class="cpanel active">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+      <div style="display:flex;gap:6px;flex:1;flex-wrap:wrap;">
+        <button class="tag sel" id="clf-all" onclick="setClubFilter('all',this)">Tous</button>
+        <button class="tag" id="clf-ok" onclick="setClubFilter('ok',this)">✓ Dispos</button>
+        <button class="tag" id="clf-injured" onclick="setClubFilter('injured',this)">🔴 Blessés</button>
+        <button class="tag" id="clf-suspended" onclick="setClubFilter('suspended',this)">🟡 Suspendus</button>
+      </div>
+      <button onclick="openClubPlayerModal(null)" style="background:var(--accent);border:none;border-radius:5px;padding:8px 12px;color:#000;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;white-space:nowrap;">+ JOUEUR</button>
+    </div>
+    <div id="clubRosterList"></div>
+  </div>
+
+  <!-- SANTÉ -->
+  <div id="cpanel-health" class="cpanel">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="dur-btn sel" id="injt-injured" onclick="setClubInjType('injured',this)">🔴 Blessés</button>
+      <button class="dur-btn" id="injt-suspended" onclick="setClubInjType('suspended',this)">🟡 Suspendus</button>
+      <button class="dur-btn" id="injt-unavailable" onclick="setClubInjType('unavailable',this)">⚫ Indispos</button>
+    </div>
+    <div id="clubHealthList"></div>
+    <button onclick="openClubHealthModal()" style="width:100%;margin-top:10px;padding:12px;background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.2);border-radius:5px;color:var(--red);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">+ DÉCLARER</button>
+  </div>
+
+  <!-- STATS -->
+  <div id="cpanel-stats" class="cpanel">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="dur-btn sel" id="scat-buts" onclick="setClubStatCat('buts',this)">⚽ Buts</button>
+      <button class="dur-btn" id="scat-passes" onclick="setClubStatCat('passes',this)">🎁 Passes</button>
+      <button class="dur-btn" id="scat-matchs" onclick="setClubStatCat('matchs',this)">📋 Matchs</button>
+      <button class="dur-btn" id="scat-minutes" onclick="setClubStatCat('minutes',this)">⏱ Minutes</button>
+    </div>
+    <div id="clubStatsList"></div>
+  </div>
+
+  <!-- SAISON -->
+  <div id="cpanel-season" class="cpanel">
+    <div id="clubSeasonStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="dur-btn sel" id="shf-all" onclick="setClubSeasonFilter('all',this)">Tous</button>
+      <button class="dur-btn" id="shf-win" onclick="setClubSeasonFilter('win',this)">✅ Victoires</button>
+      <button class="dur-btn" id="shf-draw" onclick="setClubSeasonFilter('draw',this)">〰 Nuls</button>
+      <button class="dur-btn" id="shf-loss" onclick="setClubSeasonFilter('loss',this)">❌ Défaites</button>
+    </div>
+    <div id="clubSeasonList"></div>
+    <button onclick="syncClubFromHistory()" style="width:100%;margin-top:12px;padding:11px;background:rgba(0,184,255,0.1);border:1px solid rgba(0,184,255,0.2);border-radius:5px;color:var(--blue);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">🔄 SYNC DEPUIS HISTORIQUE</button>
+  </div>
+
+  <!-- CONFIG CLUB -->
+  <div id="cpanel-clubcfg" class="cpanel">
+    <div class="setup-card">
+      <span class="setup-label">Nom du club</span>
+      <input class="setup-input" id="cfgClubName" placeholder="Ex: VVM Chauvigny" oninput="saveClubCfg()">
+    </div>
+    <div class="setup-card">
+      <span class="setup-label">Saison</span>
+      <input class="setup-input" id="cfgClubSeason" placeholder="Ex: 2025-2026" oninput="saveClubCfg()">
+    </div>
+    <div class="setup-card">
+      <span class="setup-label">Catégorie</span>
+      <input class="setup-input" id="cfgClubCategory" placeholder="Ex: U13, Senior, Vétérans…" oninput="saveClubCfg()">
+    </div>
+    <div class="setup-card">
+      <span class="setup-label">Logo (emoji)</span>
+      <input class="setup-input" id="cfgClubEmoji" placeholder="🏆" maxlength="4" oninput="saveClubCfg()">
+    </div>
+    <button onclick="resetClubData()" class="btn-danger-full">🗑 RÉINITIALISER LES DONNÉES CLUB</button>
+  </div>
+
+</div>
+
+<!-- MODAL JOUEUR CLUB -->
+<div class="modal-overlay" id="modalClubPlayer">
+  <div class="modal">
+    <div class="modal-title" id="clubPlayerModalTitle">NOUVEAU JOUEUR</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div><label class="modal-label">Prénom</label><input class="modal-input" id="cpPrenom" placeholder="Prénom"></div>
+      <div><label class="modal-label">Nom</label><input class="modal-input" id="cpNom" placeholder="Nom"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;">
+      <div><label class="modal-label">N°</label><input class="modal-input" id="cpNum" placeholder="7" type="number"></div>
+      <div><label class="modal-label">Poste</label>
+        <select class="modal-select" id="cpPoste">
+          <option value="Gardien">Gardien</option>
+          <option value="Défenseur central">Défenseur central</option>
+          <option value="Latéral gauche">Latéral gauche</option>
+          <option value="Latéral droit">Latéral droit</option>
+          <option value="Milieu défensif">Milieu défensif</option>
+          <option value="Milieu central">Milieu central</option>
+          <option value="Milieu offensif">Milieu offensif</option>
+          <option value="Ailier gauche">Ailier gauche</option>
+          <option value="Ailier droit">Ailier droit</option>
+          <option value="Attaquant">Attaquant</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div><label class="modal-label">Catégorie</label>
+        <select class="modal-select" id="cpCat">
+          <option>U7</option><option>U8</option><option>U9</option><option>U10</option>
+          <option>U11</option><option>U12</option><option>U13</option><option>U14</option>
+          <option>U15</option><option>U16</option><option>U17</option><option>U18</option>
+          <option>U19</option><option>U21</option><option selected>Senior</option><option>Vétéran</option>
+        </select>
+      </div>
+      <div><label class="modal-label">Pied fort</label>
+        <select class="modal-select" id="cpPied">
+          <option value="D">Droit</option><option value="G">Gauche</option><option value="B">Les deux</option>
+        </select>
+      </div>
+    </div>
+    <label class="modal-label">Stats saison (manuel)</label>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;">
+      <div style="text-align:center;"><div style="font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">MJ</div><input class="modal-input" id="cpMj" type="number" min="0" value="0" style="text-align:center;padding:8px 4px;"></div>
+      <div style="text-align:center;"><div style="font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">BUTS</div><input class="modal-input" id="cpButs" type="number" min="0" value="0" style="text-align:center;padding:8px 4px;"></div>
+      <div style="text-align:center;"><div style="font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">PASSES</div><input class="modal-input" id="cpPasses" type="number" min="0" value="0" style="text-align:center;padding:8px 4px;"></div>
+      <div style="text-align:center;"><div style="font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">MIN</div><input class="modal-input" id="cpMinutes" type="number" min="0" value="0" style="text-align:center;padding:8px 4px;"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-modal-cancel" onclick="closeModal('modalClubPlayer')">Annuler</button>
+      <button class="btn-modal-confirm" onclick="saveClubPlayer()">💾 ENREGISTRER</button>
+    </div>
+    <button id="btnDeleteClubPlayer" onclick="deleteClubPlayer()" style="display:none;width:100%;margin-top:8px;padding:11px;background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.2);border-radius:4px;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);cursor:pointer;">🗑 SUPPRIMER CE JOUEUR</button>
+  </div>
+</div>
+
+<!-- MODAL SANTÉ CLUB -->
+<div class="modal-overlay" id="modalClubHealth">
+  <div class="modal">
+    <div class="modal-title">DÉCLARER INDISPO</div>
+    <label class="modal-label">Joueur</label>
+    <select class="modal-select" id="chPlayer"></select>
+    <label class="modal-label">Statut</label>
+    <div class="option-row">
+      <button class="opt-btn sel" id="chs-injured" onclick="setClubHealthStatus('injured',this)">🔴 Blessé</button>
+      <button class="opt-btn" id="chs-suspended" onclick="setClubHealthStatus('suspended',this)">🟡 Suspendu</button>
+      <button class="opt-btn" id="chs-unavailable" onclick="setClubHealthStatus('unavailable',this)">⚫ Indisponible</button>
+    </div>
+    <label class="modal-label">Note / détail</label>
+    <input class="modal-input" id="chNote" placeholder="Ex: Cheville droite, 3 matchs de suspension…">
+    <label class="modal-label">Date de retour estimée</label>
+    <input class="modal-input" id="chRetour" type="date">
+    <div class="modal-buttons">
+      <button class="btn-modal-cancel" onclick="closeModal('modalClubHealth')">Annuler</button>
+      <button class="btn-modal-confirm" onclick="saveClubHealth()">✅ VALIDER</button>
+    </div>
+  </div>
+</div>
+
 
 <div class="panel" id="panel-adversaire">
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
@@ -408,7 +878,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- TACTIQUE -->
-
 <div class="panel" id="panel-tactique">
   <div class="section-title" style="margin-top:0;">Format de jeu</div>
   <div class="format-tabs">
@@ -437,40 +906,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
     </div>
     <div id="selectedTacticLabel" style="text-align:center;font-family:var(--fd);font-size:14px;color:var(--accent);letter-spacing:2px;margin-top:6px;font-weight:700;text-transform:uppercase;"></div>
 
-```
-<!-- CHANGEMENT EN COURS DE MATCH -->
-<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:14px;">
-  <div style="font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:8px;">🔄 Changer de tactique en cours de match</div>
-  <div style="font-family:var(--fb);font-size:12px;color:var(--muted);margin-bottom:10px;">Adapte-toi : expulsion, retard au score, tenir un résultat…</div>
-  <div class="tactic-grid" id="tacticGridChange" style="margin-bottom:8px;"></div>
-  <div id="changeTacticReason" style="margin-bottom:8px;display:none;">
-    <div style="font-family:var(--fd);font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">RAISON DU CHANGEMENT (optionnel)</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="tag" id="ctr_exp" onclick="selectChangeTacticReason('Expulsion définitive')">🟥 Expulsion</button>
-      <button class="tag" id="ctr_exc" onclick="selectChangeTacticReason('Exclusion temporaire')">⬜ Exclusion</button>
-      <button class="tag" id="ctr_ret" onclick="selectChangeTacticReason('Retard au score')">⬇ Retard</button>
-      <button class="tag" id="ctr_avance" onclick="selectChangeTacticReason('Tenir l\'avance')">🛡 Tenir avance</button>
-      <button class="tag" id="ctr_adj" onclick="selectChangeTacticReason('Ajustement tactique')">🎯 Ajustement</button>
+    <!-- CHANGEMENT EN COURS DE MATCH -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:14px;">
+      <div style="font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:8px;">🔄 Changer de tactique en cours de match</div>
+      <div style="font-family:var(--fb);font-size:12px;color:var(--muted);margin-bottom:10px;">Adapte-toi : expulsion, retard au score, tenir un résultat…</div>
+      <div class="tactic-grid" id="tacticGridChange" style="margin-bottom:8px;"></div>
+      <div id="changeTacticReason" style="margin-bottom:8px;display:none;">
+        <div style="font-family:var(--fd);font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">RAISON DU CHANGEMENT (optionnel)</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="tag" id="ctr_exp" onclick="selectChangeTacticReason('Expulsion définitive')">🟥 Expulsion</button>
+          <button class="tag" id="ctr_exc" onclick="selectChangeTacticReason('Exclusion temporaire')">⬜ Exclusion</button>
+          <button class="tag" id="ctr_ret" onclick="selectChangeTacticReason('Retard au score')">⬇ Retard</button>
+          <button class="tag" id="ctr_avance" onclick="selectChangeTacticReason('Tenir l\'avance')">🛡 Tenir avance</button>
+          <button class="tag" id="ctr_adj" onclick="selectChangeTacticReason('Ajustement tactique')">🎯 Ajustement</button>
+        </div>
+      </div>
+      <button id="btnConfirmTacticChange" style="display:none;width:100%;padding:10px;background:linear-gradient(135deg,var(--accent2),#ff8c42);border:none;border-radius:8px;color:#fff;font-family:var(--fd);font-size:13px;font-weight:900;letter-spacing:1px;cursor:pointer;" onclick="confirmTacticChange()">✓ APPLIQUER CE CHANGEMENT</button>
     </div>
-  </div>
-  <button id="btnConfirmTacticChange" style="display:none;width:100%;padding:10px;background:linear-gradient(135deg,var(--accent2),#ff8c42);border:none;border-radius:8px;color:#fff;font-family:var(--fd);font-size:13px;font-weight:900;letter-spacing:1px;cursor:pointer;" onclick="confirmTacticChange()">✓ APPLIQUER CE CHANGEMENT</button>
-</div>
 
-<!-- TACTIQUE ADVERSE -->
-<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px;">
-  <div style="font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:8px;">🔴 Tactique adverse estimée</div>
-  <div class="tactic-grid" id="tacticGridOpp"></div>
-  <div id="oppTacticLabel" style="text-align:center;font-family:var(--fd);font-size:13px;color:var(--red);letter-spacing:1px;margin-top:6px;min-height:18px;"></div>
-</div>
-```
-
+    <!-- TACTIQUE ADVERSE -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px;">
+      <div style="font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:8px;">🔴 Tactique adverse estimée</div>
+      <div class="tactic-grid" id="tacticGridOpp"></div>
+      <div id="oppTacticLabel" style="text-align:center;font-family:var(--fd);font-size:13px;color:var(--red);letter-spacing:1px;margin-top:6px;min-height:18px;"></div>
+    </div>
   </div>
 </div>
 
 <!-- TERRAIN -->
-
 <!-- LOG -->
-
 <div class="panel" id="panel-log">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
     <div class="section-title" style="margin:0">Journal des événements</div>
@@ -480,7 +944,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- NOTES -->
-
 <div class="panel" id="panel-notes">
   <div class="section-title">Notes 1ère mi-temps</div>
   <textarea class="notes-area" id="notes1" placeholder="Observations tactiques, joueurs à surveiller, instructions..."></textarea>
@@ -501,7 +964,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- RAPPORT -->
-
 <div class="panel" id="panel-rapport">
   <div style="display:flex;gap:8px;margin-bottom:10px;">
     <button onclick="showRapportTab('summary')" id="rtab-summary" style="flex:1;padding:9px;background:var(--accent);border:none;border-radius:8px;color:#000;font-family:var(--fd);font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;">📋 RÉSUMÉ</button>
@@ -518,7 +980,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- HISTORIQUE -->
-
 <div class="panel" id="panel-historique">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
     <div class="section-title" style="margin:0;flex:1" id="histoTitle">Historique</div>
@@ -532,7 +993,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- SETUP -->
-
 <div class="panel" id="panel-setup">
   <div class="setup-card">
     <div class="section-title" style="margin-top:0">Équipes</div>
@@ -556,8 +1016,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
   </div>
 </div>
 
-<!-- MODAL SÉQUENCE DE PASSE -->
+<!-- MODAL IMPORT CLUB MANAGER -->
+<div class="modal-overlay" id="modalImportCM">
+  <div class="modal">
+    <div class="modal-title">📥 IMPORTER EFFECTIF</div>
+    <div id="importCMClubSelect" style="margin-bottom:12px;"></div>
+    <div id="importCMPlayerList"></div>
+    <div id="importCMNote" style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--muted);margin-bottom:8px;"></div>
+    <div style="margin:10px 0 6px;">
+      <span style="font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">Statut :</span>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="importStatusBtn sel" id="ist-field" onclick="setImportStatus('field',this)">🟢 Terrain</button>
+        <button class="importStatusBtn" id="ist-bench" onclick="setImportStatus('bench',this)">💺 Banc</button>
+      </div>
+    </div>
+    <div id="importCMCount" style="font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--muted);margin:6px 0;"></div>
+    <div class="modal-buttons">
+      <button class="btn-modal-cancel" onclick="closeModal('modalImportCM')">Annuler</button>
+      <button class="btn-modal-confirm" onclick="confirmImportCM()">✅ IMPORTER</button>
+    </div>
+  </div>
+</div>
 
+<!-- MODAL SÉQUENCE DE PASSE -->
 <div class="modal-overlay" id="modalSeq">
   <div class="modal" style="max-height:85vh;overflow-y:auto;">
     <div class="modal-title">🔗 Séquence de passe</div>
@@ -586,28 +1067,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
   </div>
 </div>
 
-<!-- MODAL IMPORT CLUB MANAGER -->
-
-<div class="modal-overlay" id="modalImportCM">
-  <div class="modal" style="max-height:85vh;overflow-y:auto;">
-    <div class="modal-title">📥 Importer depuis Club Manager</div>
-    <div id="importCMClubSelect" style="margin-bottom:12px;"></div>
-    <div id="importCMPlayerList" style="margin-bottom:12px;"></div>
-    <div style="font-family:var(--fd);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">STATUT PAR DÉFAUT</div>
-    <div style="display:flex;gap:6px;margin-bottom:14px;">
-      <button class="importStatusBtn sel" id="ist-field" onclick="setImportStatus('field',this)">🟢 Terrain</button>
-      <button class="importStatusBtn" id="ist-bench" onclick="setImportStatus('bench',this)">💺 Banc</button>
-    </div>
-    <div id="importCMNote" style="font-family:var(--fd);font-size:11px;color:var(--accent);margin-bottom:10px;min-height:16px;"></div>
-    <div class="modal-buttons">
-      <button class="btn-modal-cancel" onclick="closeModal('modalImportCM')">✕ Annuler</button>
-      <button class="btn-modal-confirm" onclick="confirmImportCM()">📥 IMPORTER</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL ACTION GÉNÉRIQUE -->
-
 <div class="modal-overlay" id="modalAction">
   <div class="modal">
     <div class="modal-title" id="actionModalTitle">Action</div>
@@ -631,46 +1091,41 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL BUT -->
-
 <div class="modal-overlay" id="modalGoal">
   <div class="modal">
     <div class="modal-title">🟢 But marqué !</div>
     <div class="input-row"><div class="input-label">Buteur</div><select class="input-field" id="goalScorerSelect"></select></div>
     <div class="input-row"><div class="input-label">Passeur (optionnel)</div><select class="input-field" id="goalAssistSelect"></select></div>
 
-```
-<!-- Partie du corps -->
-<div class="input-label" style="margin-bottom:6px;">Comment ?</div>
-<div style="display:flex;gap:8px;margin-bottom:14px;">
-  <button class="tag" id="bodyPied_d" onclick="selectBodyPart('Pied droit')">🦵 Pied droit</button>
-  <button class="tag" id="bodyPied_g" onclick="selectBodyPart('Pied gauche')">🦵 Pied gauche</button>
-  <button class="tag" id="bodyTete" onclick="selectBodyPart('Tête')">🤕 Tête</button>
-</div>
+    <!-- Partie du corps -->
+    <div class="input-label" style="margin-bottom:6px;">Comment ?</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="tag" id="bodyPied_d" onclick="selectBodyPart('Pied droit')">🦵 Pied droit</button>
+      <button class="tag" id="bodyPied_g" onclick="selectBodyPart('Pied gauche')">🦵 Pied gauche</button>
+      <button class="tag" id="bodyTete" onclick="selectBodyPart('Tête')">🤕 Tête</button>
+    </div>
 
-<!-- Schéma but 6 zones -->
-<div class="input-label" style="margin-bottom:6px;">Zone du but</div>
-<div style="background:#1a5c1a;border:3px solid #fff;border-radius:4px;padding:6px;margin-bottom:12px;">
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">
-    <button class="goal-zone" id="gz1" onclick="selectGoalZone(1)">HG</button>
-    <button class="goal-zone" id="gz2" onclick="selectGoalZone(2)">HC</button>
-    <button class="goal-zone" id="gz3" onclick="selectGoalZone(3)">HD</button>
-    <button class="goal-zone" id="gz4" onclick="selectGoalZone(4)">BG</button>
-    <button class="goal-zone" id="gz5" onclick="selectGoalZone(5)">BC</button>
-    <button class="goal-zone" id="gz6" onclick="selectGoalZone(6)">BD</button>
-  </div>
-</div>
+    <!-- Schéma but 6 zones -->
+    <div class="input-label" style="margin-bottom:6px;">Zone du but</div>
+    <div style="background:#1a5c1a;border:3px solid #fff;border-radius:4px;padding:6px;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">
+        <button class="goal-zone" id="gz1" onclick="selectGoalZone(1)">HG</button>
+        <button class="goal-zone" id="gz2" onclick="selectGoalZone(2)">HC</button>
+        <button class="goal-zone" id="gz3" onclick="selectGoalZone(3)">HD</button>
+        <button class="goal-zone" id="gz4" onclick="selectGoalZone(4)">BG</button>
+        <button class="goal-zone" id="gz5" onclick="selectGoalZone(5)">BC</button>
+        <button class="goal-zone" id="gz6" onclick="selectGoalZone(6)">BD</button>
+      </div>
+    </div>
 
-<div class="modal-buttons">
-  <button class="btn-modal-cancel" onclick="closeModal('modalGoal')">Annuler</button>
-  <button class="btn-modal-confirm" onclick="confirmGoal()">✓ ENREGISTRER</button>
-</div>
-```
-
+    <div class="modal-buttons">
+      <button class="btn-modal-cancel" onclick="closeModal('modalGoal')">Annuler</button>
+      <button class="btn-modal-confirm" onclick="confirmGoal()">✓ ENREGISTRER</button>
+    </div>
   </div>
 </div>
 
 <!-- MODAL CARTON -->
-
 <div class="modal-overlay" id="modalCard">
   <div class="modal">
     <div class="modal-title" id="cardModalTitle">Carton</div>
@@ -687,7 +1142,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL CARTON BLANC -->
-
 <div class="modal-overlay" id="modalCartonBlanc">
   <div class="modal">
     <div class="modal-title">⬜ Carton blanc — Exclusion 10 min</div>
@@ -705,7 +1159,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL REMPLACEMENT -->
-
 <div class="modal-overlay" id="modalSub">
   <div class="modal">
     <div class="modal-title">🔄 Remplacement</div>
@@ -719,7 +1172,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL AJOUTER JOUEUR -->
-
 <div class="modal-overlay" id="modalAddPlayer">
   <div class="modal">
     <div class="modal-title">➕ Ajouter un joueur</div>
@@ -755,7 +1207,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL BUT ENCAISSÉ -->
-
 <div class="modal-overlay" id="modalOppGoal">
   <div class="modal">
     <div class="modal-title">🔴 But encaissé</div>
@@ -787,7 +1238,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL AJOUTER JOUEUR ADVERSE -->
-
 <div class="modal-overlay" id="modalAddOpp">
   <div class="modal">
     <div class="modal-title">➕ Joueur adverse</div>
@@ -818,7 +1268,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL ÉDITION JOUEUR ADVERSE -->
-
 <div class="modal-overlay" id="modalEditOpp">
   <div class="modal">
     <div class="modal-title">✏️ Modifier joueur adverse</div>
@@ -851,7 +1300,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL PENALTY MARQUÉ -->
-
 <div class="modal-overlay" id="modalPenaltyMarque">
   <div class="modal">
     <div class="modal-title">⚽ Penalty marqué !</div>
@@ -881,7 +1329,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL PENALTY ARRÊTÉ -->
-
 <div class="modal-overlay" id="modalPenaltyArrete">
   <div class="modal">
     <div class="modal-title">🧤 Penalty arrêté !</div>
@@ -913,7 +1360,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL TIR CADRÉ -->
-
 <div class="modal-overlay" id="modalTirCadre">
   <div class="modal">
     <div class="modal-title">🎯 Tir cadré</div>
@@ -945,7 +1391,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL TIR RATÉ -->
-
 <div class="modal-overlay" id="modalTirRate">
   <div class="modal">
     <div class="modal-title">↗️ Tir non cadré</div>
@@ -974,7 +1419,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL PENALTY RATÉ OFFENSIF -->
-
 <div class="modal-overlay" id="modalPenaltyRateOff">
   <div class="modal">
     <div class="modal-title">❌ Penalty raté</div>
@@ -1004,7 +1448,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL ARRÊT GARDIEN -->
-
 <div class="modal-overlay" id="modalArretGardien">
   <div class="modal">
     <div class="modal-title">🧤 Arrêt du gardien</div>
@@ -1037,7 +1480,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL PENALTY RATÉ ADVERSE -->
-
 <div class="modal-overlay" id="modalPenaltyRateAdverse">
   <div class="modal">
     <div class="modal-title">🚫 Penalty raté (adverse)</div>
@@ -1066,7 +1508,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL CENTRE -->
-
 <div class="modal-overlay" id="modalCentre">
   <div class="modal">
     <div class="modal-title">📐 Centre</div>
@@ -1092,7 +1533,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL COUP FRANC -->
-
 <div class="modal-overlay" id="modalCoupFranc">
   <div class="modal">
     <div class="modal-title">🎯 Coup franc</div>
@@ -1111,7 +1551,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL CORNER -->
-
 <div class="modal-overlay" id="modalCorner">
   <div class="modal">
     <div class="modal-title">🚩 Corner</div>
@@ -1135,7 +1574,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL CORRECTION SCORE -->
-
 <div class="modal-overlay" id="modalScoreEdit">
   <div class="modal">
     <div class="modal-title">✏️ Corriger le score</div>
@@ -1159,7 +1597,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 </div>
 
 <!-- MODAL ÉDITION JOUEUR -->
-
 <div class="modal-overlay" id="modalEditPlayer">
   <div class="modal">
     <div class="modal-title">✏️ Modifier le joueur</div>
@@ -1275,6 +1712,17 @@ const TACTICS={
       {x:50,y:91,pos:'GK'},{x:8,y:70,pos:'DL'},{x:26,y:76,pos:'DC'},{x:50,y:77,pos:'DC'},{x:74,y:76,pos:'DC'},{x:92,y:70,pos:'DR'},
       {x:14,y:52,pos:'MG'},{x:36,y:53,pos:'MC'},{x:64,y:53,pos:'MC'},{x:86,y:52,pos:'MD'},
       {x:50,y:23,pos:'ATT'}]},
+    {name:'4-3-3 (KLOPP)',desc:'Gegenpressing — Liverpool — Pressing haut intense',positions:[
+      {x:50,y:91,pos:'GK'},
+      {x:15,y:72,pos:'DL'},{x:37,y:77,pos:'DC'},{x:63,y:77,pos:'DC'},{x:85,y:72,pos:'DR'},
+      {x:25,y:50,pos:'MC'},{x:50,y:55,pos:'MDC'},{x:75,y:50,pos:'MC'},
+      {x:14,y:24,pos:'AG'},{x:50,y:20,pos:'ATT'},{x:86,y:24,pos:'AD'}]},
+    {name:'3-4-2-1 (ALONSO)',desc:'Leverkusen — Transitions + bloc compact',positions:[
+      {x:50,y:91,pos:'GK'},
+      {x:25,y:78,pos:'DC'},{x:50,y:80,pos:'DC'},{x:75,y:78,pos:'DC'},
+      {x:10,y:54,pos:'DL'},{x:35,y:54,pos:'MC'},{x:65,y:54,pos:'MC'},{x:90,y:54,pos:'DR'},
+      {x:33,y:28,pos:'MO'},{x:67,y:28,pos:'MO'},
+      {x:50,y:16,pos:'ATT'}]},
   ],
   8:[
     {name:'3-3-1',desc:'Équilibré à 8',positions:[
@@ -1300,7 +1748,7 @@ const TACTICS={
     {name:'3-1-3',desc:'Verrou défensif',positions:[
       {x:50,y:91,pos:'GK'},{x:22,y:75,pos:'DC'},{x:50,y:75,pos:'DC'},{x:78,y:75,pos:'DC'},
       {x:50,y:53,pos:'MDC'},
-      {x:18,y:27,pos:'AG'},{x:50,y:24,pos:'ATT'},{x:82,y:27,pos:'AD'}]},
+      {x:18,y:27,pos:'AG'},{x:50,y:24,pos:'ATT'},{x:82,y:27,pos:'AD'}]}
   ]
 };
 
@@ -1823,35 +2271,53 @@ function confirmCentre(withDetail){
   addEventToLog('📐',text);
   closeModal('modalCentre');
 }
+function makeJerseySVG(color, numColor, num) {
+  return '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    + '<path d="M8 10 L2 18 L8 20 L8 36 L32 36 L32 20 L38 18 L32 10 C28 8 26 6 20 6 C14 6 12 8 8 10Z" fill="' + color + '" stroke="rgba(0,0,0,0.5)" stroke-width="1.5"/>'
+    + '<path d="M14 7 C14 12 26 12 26 7" fill="rgba(255,255,255,0.15)"/>'
+    + '<text x="20" y="25" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="12" fill="' + numColor + '">' + num + '</text>'
+    + '</svg>';
+}
 function renderPitch(){
   if(selectedTactic===null)return;
   const tactic=TACTICS[currentFormat][selectedTactic];
-  const container=document.getElementById('pitchContainer');
   const tokenContainer=document.getElementById('playerTokens');
+  if(!tokenContainer)return;
   tokenContainer.innerHTML='';
-  // Map players by position
   const posMap={};
-  roster.forEach(p=>{if(!posMap[p.pos])posMap[p.pos]=[];posMap[p.pos].push(p);});
+  roster.forEach(function(p){if(!posMap[p.pos])posMap[p.pos]=[];posMap[p.pos].push(p);});
   const posUsed={};
-  tactic.positions.forEach((slot)=>{
-    const div=document.createElement('div');
+  tactic.positions.forEach(function(slot){
+    var div=document.createElement('div');
     div.className='player-token';
-    div.style.left=slot.x+'%';div.style.top=slot.y+'%';
-    const k=slot.pos;
+    div.style.left=slot.x+'%';
+    div.style.top=slot.y+'%';
+    var k=slot.pos;
     if(!posUsed[k])posUsed[k]=0;
-    const candidates=(posMap[k]||[]);
-    const player=candidates[posUsed[k]];
+    var candidates=(posMap[k]||[]);
+    var player=candidates[posUsed[k]];
     posUsed[k]=(posUsed[k]||0)+1;
-    const isOut=player&&player.status==='out';
-    const isEmpty=!player;
-    const dotClass=isEmpty?'empty-slot':isOut?'substituted':'on-field';
-    div.innerHTML=`<div class="player-dot ${dotClass}">${player?player.num:slot.pos}</div>
-      <div class="player-name-tag">${player?player.name:''}</div>`;
+    var isOut=player&&player.status==='out';
+    var isBench=player&&player.status==='bench';
+    var jerseyColor=isOut?'#FF6B00':isBench?'#6B7A8D':'#00E676';
+    var numColor=isBench?'#fff':'#000';
+    var num=player?player.num:'';
+    var shortName=player?(player.name.split(' ').pop().substring(0,8)):slot.pos;
+    var wrap=document.createElement('div');
+    wrap.className='jersey-wrap';
+    wrap.innerHTML=makeJerseySVG(jerseyColor,numColor,num);
+    div.appendChild(wrap);
+    var lbl=document.createElement('div');
+    lbl.className='token-name';
+    lbl.textContent=shortName;
+    div.appendChild(lbl);
+    if(player){
+      (function(pid){div.onclick=function(){openEditPlayerModal(pid);};})(player.id);
+    }
     tokenContainer.appendChild(div);
   });
 }
 
-// ===== RAPPORT =====
 function buildRapport(){
   const tacticInfo=selectedTactic!==null?TACTICS[currentFormat][selectedTactic].name+' ('+currentFormat+'v'+currentFormat+')':'Non définie';
   const statsList=[
@@ -3487,7 +3953,531 @@ function confirmImportCM() {
   alert(msg);
 }
 
-</script>
 
+
+
+// ===== MODULE CLUB INTÉGRÉ =====
+
+var _clubFormat = 11;
+var _clubFilter = 'all';
+var _clubStatCat = 'buts';
+var _clubInjType = 'injured';
+var _clubSeasonFilter = 'all';
+var _clubHealthStatus = 'injured';
+var _editClubPlayerId = null;
+
+function loadClubData() {
+  var d = localStorage.getItem('ct_club');
+  return d ? JSON.parse(d) : {
+    name: 'Mon Club', season: '2025-2026', category: '', emoji: '⚽',
+    players11: [], players8: []
+  };
+}
+function saveClubData(data) {
+  localStorage.setItem('ct_club', JSON.stringify(data));
+}
+function clubPlayers() {
+  var d = loadClubData();
+  return _clubFormat === 11 ? (d.players11 || []) : (d.players8 || []);
+}
+function saveClubPlayers(players) {
+  var d = loadClubData();
+  if (_clubFormat === 11) d.players11 = players; else d.players8 = players;
+  saveClubData(d);
+}
+
+function showClubTab(tab, el) {
+  document.querySelectorAll('.ctab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.cpanel').forEach(function(p){ p.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  var panel = document.getElementById('cpanel-' + tab);
+  if (panel) panel.classList.add('active');
+  if (tab === 'roster') renderClubRoster();
+  if (tab === 'health') renderClubHealth();
+  if (tab === 'stats') renderClubStats();
+  if (tab === 'season') renderClubSeason();
+  if (tab === 'clubcfg') renderClubCfg();
+}
+
+function setClubFormat(fmt, el) {
+  _clubFormat = fmt;
+  document.querySelectorAll('#clubFmt11,#clubFmt8').forEach(function(b){ b.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+  renderClubRoster();
+  renderClubInfoBar();
+}
+
+function renderClubInfoBar() {
+  var d = loadClubData();
+  var el = document.getElementById('clubNameDisplay');
+  var meta = document.getElementById('clubMetaDisplay');
+  var logo = document.getElementById('clubLogoDisplay');
+  if (el) el.textContent = (d.name || 'Mon Club').toUpperCase();
+  if (meta) meta.textContent = (d.category ? d.category + ' — ' : '') + (d.season || 'Saison');
+  if (logo) logo.textContent = d.emoji || '⚽';
+  // Quick stats
+  var players = clubPlayers();
+  var ok = players.filter(function(p){ return !p.status || p.status === 'ok'; }).length;
+  var injured = players.filter(function(p){ return p.status === 'injured'; }).length;
+  var qs = document.getElementById('clubQuickStats');
+  if (qs) qs.innerHTML =
+    '<div style="text-align:center;"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;color:var(--accent);line-height:1;">' + players.length + '</div><div style="font-family:\'Rajdhani\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Joueurs</div></div>' +
+    '<div style="text-align:center;"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;color:var(--green);line-height:1;">' + ok + '</div><div style="font-family:\'Rajdhani\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Dispos</div></div>' +
+    (injured > 0 ? '<div style="text-align:center;"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;color:var(--red);line-height:1;">' + injured + '</div><div style="font-family:\'Rajdhani\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Blessés</div></div>' : '');
+}
+
+function renderClubRoster() {
+  renderClubInfoBar();
+  var players = clubPlayers();
+  var filtered = players.filter(function(p) {
+    if (_clubFilter === 'all') return true;
+    if (_clubFilter === 'ok') return !p.status || p.status === 'ok';
+    return p.status === _clubFilter;
+  });
+  filtered.sort(function(a, b) { return (parseInt(a.num)||99) - (parseInt(b.num)||99); });
+  var list = document.getElementById('clubRosterList');
+  if (!list) return;
+  if (!filtered.length) { list.innerHTML = '<div class="empty-log">Aucun joueur</div>'; return; }
+  list.innerHTML = filtered.map(function(p) {
+    var statusColor = p.status === 'injured' ? 'var(--red)' : p.status === 'suspended' ? 'var(--yellow)' : p.status === 'unavailable' ? 'var(--muted)' : 'rgba(0,230,118,0.4)';
+    var statusLabel = p.status === 'injured' ? '🔴 BLESSÉ' : p.status === 'suspended' ? '🟡 SUSPENDU' : p.status === 'unavailable' ? '⚫ INDISPO' : '✅ DISPO';
+    var statsBar = '<span style="font-family:\'Rajdhani\',sans-serif;font-size:10px;font-weight:600;color:var(--muted);">' +
+      (p.stats ? (p.stats.matchs||0) + ' MJ — ' + (p.stats.buts||0) + ' ⚽ — ' + (p.stats.passes||0) + ' 🎁' : '') + '</span>';
+    return '<div class="roster-item" style="border-left-color:' + statusColor + ';cursor:pointer;" onclick="openClubPlayerModal(\'' + p.id + '\')">' +
+      '<div class="roster-num">' + (p.num||'') + '</div>' +
+      '<div style="flex:1;">' +
+        '<div class="roster-name">' + (p.prenom ? p.prenom + ' ' : '') + p.nom + '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<div class="roster-pos">' + (p.poste||'') + '</div>' +
+          statsBar +
+        '</div>' +
+      '</div>' +
+      '<div class="roster-status" style="background:rgba(0,0,0,0.2);color:' + statusColor + ';border:1px solid ' + statusColor + ';padding:3px 7px;border-radius:3px;font-size:9px;white-space:nowrap;">' + statusLabel + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function setClubFilter(f, el) {
+  _clubFilter = f;
+  document.querySelectorAll('#clf-all,#clf-ok,#clf-injured,#clf-suspended').forEach(function(b){ b.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+  renderClubRoster();
+}
+
+function openClubPlayerModal(pid) {
+  _editClubPlayerId = pid;
+  var players = clubPlayers();
+  var p = pid ? players.find(function(x){ return x.id === pid; }) : null;
+  var title = document.getElementById('clubPlayerModalTitle');
+  if (title) title.textContent = p ? 'MODIFIER JOUEUR' : 'NOUVEAU JOUEUR';
+  document.getElementById('cpPrenom').value = p ? (p.prenom||'') : '';
+  document.getElementById('cpNom').value = p ? (p.nom||'') : '';
+  document.getElementById('cpNum').value = p ? (p.num||'') : '';
+  document.getElementById('cpPoste').value = p ? (p.poste||'Milieu central') : 'Milieu central';
+  document.getElementById('cpCat').value = p ? (p.cat||'Senior') : 'Senior';
+  document.getElementById('cpPied').value = p ? (p.pied||'D') : 'D';
+  document.getElementById('cpMj').value = p && p.stats ? (p.stats.matchs||0) : 0;
+  document.getElementById('cpButs').value = p && p.stats ? (p.stats.buts||0) : 0;
+  document.getElementById('cpPasses').value = p && p.stats ? (p.stats.passes||0) : 0;
+  document.getElementById('cpMinutes').value = p && p.stats ? (p.stats.minutes||0) : 0;
+  var delBtn = document.getElementById('btnDeleteClubPlayer');
+  if (delBtn) delBtn.style.display = p ? 'block' : 'none';
+  document.getElementById('modalClubPlayer').classList.add('open');
+}
+
+function saveClubPlayer() {
+  var prenom = document.getElementById('cpPrenom').value.trim();
+  var nom = document.getElementById('cpNom').value.trim();
+  if (!prenom && !nom) { alert('Saisis au moins le prénom ou le nom'); return; }
+  var players = clubPlayers();
+  var pd = {
+    id: _editClubPlayerId || Date.now().toString(),
+    prenom: prenom, nom: nom,
+    num: document.getElementById('cpNum').value,
+    poste: document.getElementById('cpPoste').value,
+    cat: document.getElementById('cpCat').value,
+    pied: document.getElementById('cpPied').value,
+    stats: {
+      matchs: parseInt(document.getElementById('cpMj').value)||0,
+      buts: parseInt(document.getElementById('cpButs').value)||0,
+      passes: parseInt(document.getElementById('cpPasses').value)||0,
+      minutes: parseInt(document.getElementById('cpMinutes').value)||0
+    },
+    status: 'ok'
+  };
+  if (_editClubPlayerId) {
+    var idx = players.findIndex(function(x){ return x.id === _editClubPlayerId; });
+    if (idx >= 0) {
+      pd.status = players[idx].status || 'ok';
+      pd.injNote = players[idx].injNote;
+      pd.retour = players[idx].retour;
+      players[idx] = pd;
+    }
+  } else {
+    players.push(pd);
+  }
+  saveClubPlayers(players);
+  closeModal('modalClubPlayer');
+  renderClubRoster();
+  renderClubInfoBar();
+}
+
+function deleteClubPlayer() {
+  if (!_editClubPlayerId) return;
+  if (!confirm('Supprimer ce joueur ?')) return;
+  var players = clubPlayers().filter(function(p){ return p.id !== _editClubPlayerId; });
+  saveClubPlayers(players);
+  closeModal('modalClubPlayer');
+  renderClubRoster();
+  renderClubInfoBar();
+}
+
+// SANTÉ
+function renderClubHealth() {
+  var players = clubPlayers();
+  var filtered = players.filter(function(p){ return p.status === _clubInjType; });
+  var list = document.getElementById('clubHealthList');
+  if (!list) return;
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-log">Aucun joueur dans cette catégorie</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(p) {
+    var icon = p.status === 'injured' ? '🔴' : p.status === 'suspended' ? '🟡' : '⚫';
+    return '<div class="roster-item" style="cursor:pointer;" onclick="clearClubHealth(\'' + p.id + '\')">' +
+      '<div class="roster-num">' + (p.num||'') + '</div>' +
+      '<div style="flex:1;">' +
+        '<div class="roster-name">' + icon + ' ' + (p.prenom ? p.prenom + ' ' : '') + p.nom + '</div>' +
+        '<div style="font-family:\'Rajdhani\',sans-serif;font-size:11px;font-weight:600;color:var(--muted);">' +
+          (p.injNote||'') + (p.retour ? ' — Retour : ' + p.retour : '') +
+        '</div>' +
+      '</div>' +
+      '<div style="font-family:\'Rajdhani\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;">Tap = Rétabli</div>' +
+    '</div>';
+  }).join('');
+}
+
+function setClubInjType(t, el) {
+  _clubInjType = t;
+  document.querySelectorAll('#injt-injured,#injt-suspended,#injt-unavailable').forEach(function(b){ b.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+  renderClubHealth();
+}
+
+function openClubHealthModal() {
+  var players = clubPlayers().filter(function(p){ return !p.status || p.status === 'ok'; });
+  var sel = document.getElementById('chPlayer');
+  if (!sel) return;
+  sel.innerHTML = players.map(function(p){
+    return '<option value="' + p.id + '">' + (p.num ? '#'+p.num+' ' : '') + (p.prenom ? p.prenom+' ' : '') + p.nom + '</option>';
+  }).join('');
+  _clubHealthStatus = 'injured';
+  document.querySelectorAll('#chs-injured,#chs-suspended,#chs-unavailable').forEach(function(b){ b.classList.remove('sel'); });
+  var injEl = document.getElementById('chs-injured');
+  if (injEl) injEl.classList.add('sel');
+  document.getElementById('chNote').value = '';
+  document.getElementById('chRetour').value = '';
+  document.getElementById('modalClubHealth').classList.add('open');
+}
+
+function setClubHealthStatus(s, el) {
+  _clubHealthStatus = s;
+  document.querySelectorAll('#chs-injured,#chs-suspended,#chs-unavailable').forEach(function(b){ b.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+}
+
+function saveClubHealth() {
+  var pid = document.getElementById('chPlayer').value;
+  var players = clubPlayers();
+  var p = players.find(function(x){ return x.id === pid; });
+  if (!p) return;
+  p.status = _clubHealthStatus;
+  p.injNote = document.getElementById('chNote').value.trim();
+  p.retour = document.getElementById('chRetour').value;
+  saveClubPlayers(players);
+  closeModal('modalClubHealth');
+  renderClubHealth();
+  renderClubInfoBar();
+}
+
+function clearClubHealth(pid) {
+  if (!confirm('Marquer ce joueur comme rétabli ?')) return;
+  var players = clubPlayers();
+  var p = players.find(function(x){ return x.id === pid; });
+  if (p) { p.status = 'ok'; p.injNote = ''; p.retour = ''; }
+  saveClubPlayers(players);
+  renderClubHealth();
+  renderClubInfoBar();
+}
+
+// STATS
+function renderClubStats() {
+  var players = clubPlayers().filter(function(p){ return p.stats; });
+  players.sort(function(a, b) {
+    var va = a.stats[_clubStatCat] || 0;
+    var vb = b.stats[_clubStatCat] || 0;
+    return vb - va;
+  });
+  var list = document.getElementById('clubStatsList');
+  if (!list) return;
+  if (!players.length) { list.innerHTML = '<div class="empty-log">Aucune stat disponible</div>'; return; }
+  var max = players[0].stats[_clubStatCat] || 1;
+  list.innerHTML = players.map(function(p, i) {
+    var val = p.stats[_clubStatCat] || 0;
+    var pct = Math.round((val / max) * 100);
+    var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.';
+    return '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:6px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+        '<div style="font-family:\'Rajdhani\',sans-serif;font-size:14px;font-weight:700;min-width:26px;">' + medal + '</div>' +
+        '<div style="flex:1;font-family:\'Rajdhani\',sans-serif;font-size:15px;font-weight:700;">' + (p.prenom ? p.prenom+' ':'')+p.nom + '</div>' +
+        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:26px;color:var(--accent);line-height:1;">' + val + '</div>' +
+      '</div>' +
+      '<div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">' +
+        '<div style="height:100%;width:' + pct + '%;background:var(--accent);border-radius:2px;transition:width .4s;"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function setClubStatCat(cat, el) {
+  _clubStatCat = cat;
+  document.querySelectorAll('#scat-buts,#scat-passes,#scat-matchs,#scat-minutes').forEach(function(b){ b.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+  renderClubStats();
+}
+
+// SAISON
+function renderClubSeason() {
+  var history = getMatchHistory();
+  // Filter by format
+  var matches = history;
+  // Season stats
+  var total = matches.length;
+  var wins = matches.filter(function(m){ return m.homeScore > m.awayScore; }).length;
+  var draws = matches.filter(function(m){ return m.homeScore === m.awayScore; }).length;
+  var losses = total - wins - draws;
+  var gf = matches.reduce(function(s,m){ return s + (m.homeScore||0); }, 0);
+  var ga = matches.reduce(function(s,m){ return s + (m.awayScore||0); }, 0);
+  var pts = wins * 3 + draws;
+
+  var statsEl = document.getElementById('clubSeasonStats');
+  if (statsEl) statsEl.innerHTML = [
+    ['MJ', total, 'var(--text)'],
+    ['V', wins, 'var(--accent)'],
+    ['N', draws, 'var(--yellow)'],
+    ['D', losses, 'var(--red)'],
+    ['PTS', pts, 'var(--blue)'],
+    ['GF', gf, 'var(--accent)'],
+    ['GA', ga, 'var(--red)'],
+    ['DIFF', (gf-ga >= 0 ? '+':'')+( gf-ga), gf>=ga?'var(--accent)':'var(--red)'],
+    ['%V', total ? Math.round(wins/total*100)+'%' : '—', 'var(--text)']
+  ].map(function(s){
+    return '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 6px;text-align:center;">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:26px;color:' + s[2] + ';line-height:1;">' + s[1] + '</div>' +
+      '<div style="font-family:\'Rajdhani\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">' + s[0] + '</div>' +
+    '</div>';
+  }).join('');
+
+  // Match list
+  var filtered = matches.filter(function(m) {
+    if (_clubSeasonFilter === 'all') return true;
+    if (_clubSeasonFilter === 'win') return m.homeScore > m.awayScore;
+    if (_clubSeasonFilter === 'draw') return m.homeScore === m.awayScore;
+    if (_clubSeasonFilter === 'loss') return m.homeScore < m.awayScore;
+    return true;
+  });
+  filtered = filtered.slice().reverse();
+
+  var list = document.getElementById('clubSeasonList');
+  if (!list) return;
+  if (!filtered.length) { list.innerHTML = '<div class="empty-log">Aucun match archivé</div>'; return; }
+  list.innerHTML = filtered.map(function(m) {
+    var isWin = m.homeScore > m.awayScore;
+    var isDraw = m.homeScore === m.awayScore;
+    var resultColor = isWin ? 'var(--accent)' : isDraw ? 'var(--yellow)' : 'var(--red)';
+    var resultLabel = isWin ? 'V' : isDraw ? 'N' : 'D';
+    var date = m.date ? new Date(m.date).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit'}) : '';
+    return '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid ' + resultColor + ';border-radius:6px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:18px;color:' + resultColor + ';min-width:20px;">' + resultLabel + '</div>' +
+      '<div style="flex:1;">' +
+        '<div style="font-family:\'Rajdhani\',sans-serif;font-size:14px;font-weight:700;">' + (m.homeTeam||'Nous') + ' ' + m.homeScore + ' — ' + m.awayScore + ' ' + (m.awayTeam||'Adv') + '</div>' +
+        '<div style="font-family:\'Rajdhani\',sans-serif;font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;">' + (m.tactic||'') + (date ? ' · ' + date : '') + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function setClubSeasonFilter(f, el) {
+  _clubSeasonFilter = f;
+  document.querySelectorAll('#shf-all,#shf-win,#shf-draw,#shf-loss').forEach(function(b){ b.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+  renderClubSeason();
+}
+
+function syncClubFromHistory() {
+  var history = getMatchHistory();
+  if (!history.length) { alert('Aucun match archivé à synchroniser.'); return; }
+  // Update player stats from match events
+  var players = clubPlayers();
+  players.forEach(function(p) {
+    var totalButs = 0, totalPasses = 0, totalMatchs = 0, totalMin = 0;
+    history.forEach(function(m) {
+      if (!m.events) return;
+      var played = m.events.some(function(e){ return e.playerId == p.id; });
+      var subIn = m.substitutions ? m.substitutions.some(function(s){ return s.inId == p.id; }) : false;
+      var subOut = m.substitutions ? m.substitutions.find(function(s){ return s.outId == p.id; }) : null;
+      if (played || subIn) {
+        totalMatchs++;
+        totalButs += m.events.filter(function(e){ return e.playerId == p.id && (e.type === 'BUT' || e.type === 'PENALTY_MRQ'); }).length;
+        totalPasses += m.events.filter(function(e){ return e.playerId == p.id && e.type === 'ASSIST'; }).length;
+      }
+    });
+    if (!p.stats) p.stats = {};
+    p.stats.matchs = totalMatchs;
+    p.stats.buts = totalButs;
+    p.stats.passes = totalPasses;
+  });
+  saveClubPlayers(players);
+  renderClubStats();
+  renderClubRoster();
+  alert('✅ Stats synchronisées depuis ' + history.length + ' matchs.');
+}
+
+// CONFIG CLUB
+function renderClubCfg() {
+  var d = loadClubData();
+  var n = document.getElementById('cfgClubName'); if (n) n.value = d.name || '';
+  var s = document.getElementById('cfgClubSeason'); if (s) s.value = d.season || '';
+  var cat = document.getElementById('cfgClubCategory'); if (cat) cat.value = d.category || '';
+  var e = document.getElementById('cfgClubEmoji'); if (e) e.value = d.emoji || '⚽';
+}
+function saveClubCfg() {
+  var d = loadClubData();
+  var n = document.getElementById('cfgClubName'); if (n) d.name = n.value;
+  var s = document.getElementById('cfgClubSeason'); if (s) d.season = s.value;
+  var cat = document.getElementById('cfgClubCategory'); if (cat) d.category = cat.value;
+  var e = document.getElementById('cfgClubEmoji'); if (e) d.emoji = e.value;
+  saveClubData(d);
+  renderClubInfoBar();
+}
+function resetClubData() {
+  if (!confirm('Supprimer TOUTES les données club ? Cette action est irréversible.')) return;
+  localStorage.removeItem('ct_club');
+  renderClubRoster();
+  renderClubInfoBar();
+  renderClubCfg();
+  alert('Données club réinitialisées.');
+}
+
+// IMPORT DEPUIS CLUB (pour le match en cours)
+function openImportCMModal() {
+  var players = clubPlayers().filter(function(p){ return !p.status || p.status === 'ok'; });
+  var list = document.getElementById('importCMPlayerList');
+  var clubSel = document.getElementById('importCMClubSelect');
+  var note = document.getElementById('importCMNote');
+  _importSelectedPlayers = [];
+  _importStatus = 'field';
+  document.querySelectorAll('.importStatusBtn').forEach(function(b){ b.classList.remove('sel'); });
+  var istField = document.getElementById('ist-field');
+  if (istField) istField.classList.add('sel');
+  if (note) note.textContent = '';
+
+  if (!players.length) {
+    if (clubSel) clubSel.innerHTML = '<div style="font-family:\'Rajdhani\',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Aucun joueur dans le module Club (Format ' + _clubFormat + ')</div>';
+    if (list) list.innerHTML = '';
+    document.getElementById('modalImportCM').classList.add('open');
+    return;
+  }
+
+  if (clubSel) {
+    var d = loadClubData();
+    clubSel.innerHTML = '<div style="font-family:\'Rajdhani\',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">📥 Import depuis : ' + (d.name||'Mon Club') + ' — Football à ' + _clubFormat + '</div>';
+  }
+
+  // Show already imported players
+  var existingIds = roster.map(function(r){ return r.id; });
+  if (list) list.innerHTML = players.map(function(p) {
+    var already = existingIds.indexOf(p.id) >= 0;
+    var fullName = (p.prenom ? p.prenom + ' ' : '') + p.nom;
+    return '<div id="imp-' + p.id + '" onclick="' + (already ? '' : 'toggleImportPlayer(\'' + p.id + '\')') + '" style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:6px;cursor:' + (already?'default':'pointer') + ';opacity:' + (already?'0.4':'1') + ';">' +
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:rgba(0,230,118,0.5);min-width:28px;">' + (p.num||'') + '</div>' +
+      '<div style="flex:1;"><div style="font-family:\'Rajdhani\',sans-serif;font-size:14px;font-weight:700;">' + fullName + '</div>' +
+      '<div style="font-family:\'Rajdhani\',sans-serif;font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;">' + (p.poste||'') + '</div></div>' +
+      (already ? '<div style="font-family:\'Rajdhani\',sans-serif;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;">DÉJÀ AJOUTÉ</div>' : '<div id="imp-chk-' + p.id + '" style="width:20px;height:20px;border:2px solid var(--border);border-radius:4px;"></div>') +
+    '</div>';
+  }).join('');
+
+  document.getElementById('modalImportCM').classList.add('open');
+}
+
+function toggleImportPlayer(pid) {
+  var idx = _importSelectedPlayers.indexOf(pid);
+  var chk = document.getElementById('imp-chk-' + pid);
+  var row = document.getElementById('imp-' + pid);
+  if (idx >= 0) {
+    _importSelectedPlayers.splice(idx, 1);
+    if (chk) { chk.style.background = ''; chk.style.borderColor = 'var(--border)'; chk.textContent = ''; }
+    if (row) row.style.background = 'var(--surface2)';
+  } else {
+    _importSelectedPlayers.push(pid);
+    if (chk) { chk.style.background = 'var(--accent)'; chk.style.borderColor = 'var(--accent)'; chk.textContent = '✓'; chk.style.color='#000'; chk.style.textAlign='center'; chk.style.lineHeight='18px'; chk.style.fontSize='12px'; }
+    if (row) row.style.background = 'rgba(0,230,118,0.05)';
+  }
+  var cnt = document.getElementById('importCMCount');
+  if (cnt) cnt.textContent = _importSelectedPlayers.length + ' joueur(s) sélectionné(s)';
+}
+
+function confirmImportCM() {
+  if (!_importSelectedPlayers.length) { alert('Sélectionne au moins un joueur.'); return; }
+  var players = clubPlayers();
+  var added = 0;
+  _importSelectedPlayers.forEach(function(pid) {
+    var p = players.find(function(x){ return x.id === pid; });
+    if (!p) return;
+    if (roster.find(function(r){ return r.id === pid; })) return;
+    roster.push({
+      id: p.id,
+      num: p.num || '',
+      name: (p.prenom ? p.prenom + ' ' : '') + p.nom,
+      pos: posFromPoste(p.poste),
+      status: _importStatus
+    });
+    added++;
+  });
+  saveRoster();
+  closeModal('modalImportCM');
+  renderRoster();
+  if (typeof renderPitch === 'function') renderPitch();
+  alert('✅ ' + added + ' joueur(s) importé(s) dans le match.');
+}
+
+function posFromPoste(poste) {
+  var map = {
+    'Gardien':'GK','Défenseur central':'DC','Latéral gauche':'DL','Latéral droit':'DR',
+    'Milieu défensif':'MDC','Milieu central':'MC','Milieu offensif':'MO',
+    'Ailier gauche':'AG','Ailier droit':'AD','Attaquant':'ATT'
+  };
+  return map[poste] || 'MC';
+}
+
+// Initialisation du module Club
+function initClubModule() {
+  renderClubInfoBar();
+}
+
+// Init Club
+initClubModule();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      console.log('SW registered');
+    }).catch(function(err){
+      console.log('SW error:', err);
+    });
+  });
+}
+</script>
 </body>
 </html>
