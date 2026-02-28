@@ -2212,6 +2212,7 @@ function renderTacticGrid(){
 }
 function selectTactic(i){
   selectedTactic=i;
+  pitchAssignment={};
   document.querySelectorAll('[id^="tc-"]').forEach(c=>c.classList.remove('selected'));
   const card=document.getElementById('tc-'+i);if(card)card.classList.add('selected');
   document.getElementById('tacticDetails').style.display='block';
@@ -2311,38 +2312,39 @@ function renderPitch(){
   const tokenContainer=document.getElementById('playerTokens');
   if(!tokenContainer)return;
   tokenContainer.innerHTML='';
-  const posMap={};
-  roster.forEach(function(p){if(!posMap[p.pos])posMap[p.pos]=[];posMap[p.pos].push(p);});
-  const posUsed={};
-  tactic.positions.forEach(function(slot){
+  // Auto-assign on first render if pitchAssignment is empty
+  if(Object.keys(pitchAssignment).length===0){
+    var fieldPlayers=roster.filter(function(p){return p.status==='field'||p.status==='suspended';});
+    tactic.positions.forEach(function(slot,i){
+      if(fieldPlayers[i]) pitchAssignment[i]=fieldPlayers[i].id;
+    });
+  }
+  tactic.positions.forEach(function(slot,i){
     var div=document.createElement('div');
     div.className='player-token';
     div.style.left=slot.x+'%';
     div.style.top=slot.y+'%';
-    var k=slot.pos;
-    if(!posUsed[k])posUsed[k]=0;
-    var candidates=(posMap[k]||[]);
-    var player=candidates[posUsed[k]];
-    posUsed[k]=(posUsed[k]||0)+1;
-    var isOut=player&&player.status==='out';
-    var isBench=player&&player.status==='bench';
-    var jerseyColor=isOut?'#FF6B00':isBench?'#6B7A8D':'#00E676';
-    var numColor=isBench?'#fff':'#000';
+    var pid=pitchAssignment[i];
+    var player=pid?roster.find(function(x){return x.id===pid;}):null;
+    // Only show on pitch if player is field or suspended (not bench/out)
+    var isActive=player&&(player.status==='field'||player.status==='suspended');
+    var jerseyColor=isActive?'#00E676':'#3a3a3a';
+    var numColor=isActive?'#000':'#888';
     var num=player?player.num:'';
-    var shortName=player?(player.name.split(' ').pop().substring(0,8)):slot.pos;
+    var shortName=player?player.name.split(' ').pop().substring(0,8):slot.pos;
+    var labelColor=isActive?'#fff':'#555';
     var wrap=document.createElement('div');
     wrap.className='jersey-wrap';
     wrap.innerHTML=makeJerseySVG(jerseyColor,numColor,num);
     div.appendChild(wrap);
     var lbl=document.createElement('div');
     lbl.className='token-name';
+    lbl.style.color=labelColor;
     lbl.textContent=shortName;
     div.appendChild(lbl);
-    if(player){
-      (function(pid){
-        div.onclick=function(){ openTacticPlayerModal(pid); };
-      })(player.id);
-    }
+    (function(slotIdx, slotPos){
+      div.onclick=function(){ openTacticSlotModal(slotIdx, slotPos); };
+    })(i, slot.pos);
     tokenContainer.appendChild(div);
   });
 }
@@ -4037,6 +4039,7 @@ var _clubSeasonFilter = 'all';
 var _clubHealthStatus = 'injured';
 var _editClubPlayerId = null;
 var _pitchSelectedId = null;
+var pitchAssignment = {}; // slotIndex -> playerId
 
 function loadClubData() {
   var d = localStorage.getItem('ct_club');
@@ -4756,26 +4759,57 @@ function setMatchLocationButtons(){
 }
 // ════════════════════════════════════════════════════════
 
-// ══ TACTICAL PLAYER EDIT ════════════════════════════════
-function openTacticPlayerModal(id){
-  var p = roster.find(function(x){ return x.id===id; });
-  if(!p) return;
-  document.getElementById('tacticPlayerId').value = id;
-  document.getElementById('tacticPlayerNum').value = p.num||'';
-  // Set current pos in select
-  var sel = document.getElementById('tacticPlayerPos');
-  if(sel) sel.value = p.pos||'MC';
+// ══ TACTICAL SLOT EDIT ══════════════════════════════════
+var _tacticSlotIndex = null;
+
+function openTacticSlotModal(slotIdx, slotPos){
+  _tacticSlotIndex = slotIdx;
+  // Build player selector — all roster players
+  var sel = document.getElementById('tacticPlayerSelect');
+  sel.innerHTML = '<option value="">— Aucun —</option>';
+  roster.forEach(function(p){
+    var opt = document.createElement('option');
+    opt.value = p.id;
+    var statusIcon = p.status==='field'?'🟢':p.status==='bench'?'💺':p.status==='out'?'🔴':'⬜';
+    opt.textContent = statusIcon+' '+p.num+' — '+p.name+' ('+p.pos+')';
+    if(pitchAssignment[slotIdx]===p.id) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  // Update num when player changes
+  updateTacticNum();
+  // Show slot pos label
+  var lbl = document.getElementById('tacticSlotPosLabel');
+  if(lbl) lbl.textContent = 'Poste dans la tactique : '+slotPos;
   document.getElementById('modalTacticPlayer').classList.add('open');
 }
 
+function updateTacticNum(){
+  var sel = document.getElementById('tacticPlayerSelect');
+  var numInput = document.getElementById('tacticPlayerNum');
+  if(!sel||!numInput) return;
+  var pid = parseInt(sel.value);
+  if(pid){
+    var p = roster.find(function(x){return x.id===pid;});
+    if(p) numInput.value = p.num||'';
+  } else {
+    numInput.value = '';
+  }
+}
+
 function confirmTacticPlayer(){
-  var id = parseInt(document.getElementById('tacticPlayerId').value);
-  var p = roster.find(function(x){ return x.id===id; });
-  if(!p) return;
-  var newNum = document.getElementById('tacticPlayerNum').value.trim();
-  var newPos = document.getElementById('tacticPlayerPos').value;
-  if(newNum !== '') p.num = newNum;
-  p.pos = newPos;
+  if(_tacticSlotIndex===null) return;
+  var sel = document.getElementById('tacticPlayerSelect');
+  var numInput = document.getElementById('tacticPlayerNum');
+  var pid = sel.value ? parseInt(sel.value) : null;
+  // Save num change to player
+  if(pid){
+    var p = roster.find(function(x){return x.id===pid;});
+    var newNum = numInput.value.trim();
+    if(p && newNum!=='') p.num = newNum;
+  }
+  // Assign player to slot (or clear if none)
+  if(pid) pitchAssignment[_tacticSlotIndex]=pid;
+  else delete pitchAssignment[_tacticSlotIndex];
   renderRoster();
   renderPitch();
   closeModal('modalTacticPlayer');
@@ -4786,28 +4820,17 @@ function confirmTacticPlayer(){
 <!-- MODAL TACTIQUE JOUEUR -->
 <div class="modal-overlay" id="modalTacticPlayer">
   <div class="modal">
-    <div class="modal-title">🎽 Modifier position</div>
-    <input type="hidden" id="tacticPlayerId">
+    <div class="modal-title">🎽 Choisir le joueur</div>
+    <div id="tacticSlotPosLabel" style="font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;"></div>
+    <div class="input-row">
+      <div class="input-label">Joueur</div>
+      <select class="input-field" id="tacticPlayerSelect" onchange="updateTacticNum()">
+        <option value="">— Aucun —</option>
+      </select>
+    </div>
     <div class="input-row">
       <div class="input-label">Numéro de maillot</div>
       <input class="input-field" id="tacticPlayerNum" type="number" min="0" max="99" placeholder="N°">
-    </div>
-    <div class="input-row">
-      <div class="input-label">Poste sur le terrain</div>
-      <select class="input-field" id="tacticPlayerPos">
-        <option value="GK">Gardien (GK)</option>
-        <option value="DC">Défenseur Central (DC)</option>
-        <option value="DL">Défenseur Latéral G (DL)</option>
-        <option value="DR">Défenseur Latéral D (DR)</option>
-        <option value="MDC">Milieu Défensif (MDC)</option>
-        <option value="MC">Milieu Central (MC)</option>
-        <option value="MO">Milieu Offensif (MO)</option>
-        <option value="MG">Milieu Gauche (MG)</option>
-        <option value="MD">Milieu Droit (MD)</option>
-        <option value="AG">Ailier Gauche (AG)</option>
-        <option value="AD">Ailier Droit (AD)</option>
-        <option value="ATT">Attaquant (ATT)</option>
-      </select>
     </div>
     <div class="modal-buttons">
       <button class="btn-modal-cancel" onclick="closeModal('modalTacticPlayer')">Annuler</button>
