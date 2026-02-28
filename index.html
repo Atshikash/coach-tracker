@@ -2339,25 +2339,9 @@ function renderPitch(){
     lbl.textContent=shortName;
     div.appendChild(lbl);
     if(player){
-      (function(pid,el){
-        div.onclick=function(){
-          if(_pitchSelectedId===null){
-            _pitchSelectedId=pid;
-            el.style.outline='3px solid var(--accent)';
-            el.style.outlineOffset='4px';
-            el.style.borderRadius='6px';
-          } else if(_pitchSelectedId===pid){
-            _pitchSelectedId=null;
-            el.style.outline='';
-          } else {
-            var p1=roster.find(function(x){return x.id===_pitchSelectedId;});
-            var p2=roster.find(function(x){return x.id===pid;});
-            if(p1&&p2){var tmp=p1.pos;p1.pos=p2.pos;p2.pos=tmp;}
-            _pitchSelectedId=null;
-            renderPitch();
-          }
-        };
-      })(player.id,div);
+      (function(pid){
+        div.onclick=function(){ openTacticPlayerModal(pid); };
+      })(player.id);
     }
     tokenContainer.appendChild(div);
   });
@@ -3973,33 +3957,22 @@ function renderImportPlayers(club) {
 }
 
 function toggleImportPlayer(id, num, name, pos) {
-  var idx = _importSelectedPlayers.findIndex(function(p){ return p.id === id; });
-  var card = document.getElementById('ip-' + id);
-  var check = document.getElementById('ipcheck-' + id);
-  if(idx === -1) {
-    _importSelectedPlayers.push({id:id, num:num, name:name, pos:pos});
-    if(card){ card.style.borderColor='var(--accent)'; card.style.background='rgba(0,212,255,0.08)'; }
-    if(check){ check.style.background='var(--accent)'; check.style.borderColor='var(--accent)'; check.textContent='✓'; check.style.color='#000'; check.style.fontWeight='900'; check.style.fontSize='12px'; }
-  } else {
-    _importSelectedPlayers.splice(idx,1);
-    if(card){ card.style.borderColor='var(--border)'; card.style.background='var(--surface)'; }
-    if(check){ check.style.background=''; check.style.borderColor='var(--border)'; check.textContent=''; }
+  // 1 clic = importé immédiatement dans l'effectif
+  var exists = roster.find(function(r){ return r.id === id || r.name.toLowerCase().trim() === name.toLowerCase().trim(); });
+  if(exists){
+    closeModal('modalImportCM');
+    return;
   }
-  var note = document.getElementById('importCMNote');
-  if(note) note.textContent = _importSelectedPlayers.length ? _importSelectedPlayers.length + ' joueur(s) sélectionné(s)' : '';
-  // Update confirm button
-  var confirmBtn = document.getElementById('btnConfirmImport');
-  if(confirmBtn){
-    if(_importSelectedPlayers.length > 0){
-      confirmBtn.textContent = '✅ IMPORTER ' + _importSelectedPlayers.length + ' JOUEUR(S)';
-      confirmBtn.style.opacity = '1';
-      confirmBtn.style.background = 'var(--accent)';
-      confirmBtn.style.color = '#000';
-    } else {
-      confirmBtn.textContent = '✅ IMPORTER';
-      confirmBtn.style.opacity = '0.5';
-    }
-  }
+  roster.push({
+    id: id,
+    num: num, name: name, pos: pos,
+    status: _importStatus,
+    entryTime: _importStatus==='field' ? seconds : null,
+    totalSeconds: 0
+  });
+  renderRoster();
+  if(selectedTactic !== null) renderPitch();
+  closeModal('modalImportCM');
 }
 
 function selectAllImportPlayers() {
@@ -4782,6 +4755,65 @@ function setMatchLocationButtons(){
   });
 }
 // ════════════════════════════════════════════════════════
+
+// ══ TACTICAL PLAYER EDIT ════════════════════════════════
+function openTacticPlayerModal(id){
+  var p = roster.find(function(x){ return x.id===id; });
+  if(!p) return;
+  document.getElementById('tacticPlayerId').value = id;
+  document.getElementById('tacticPlayerNum').value = p.num||'';
+  // Set current pos in select
+  var sel = document.getElementById('tacticPlayerPos');
+  if(sel) sel.value = p.pos||'MC';
+  document.getElementById('modalTacticPlayer').classList.add('open');
+}
+
+function confirmTacticPlayer(){
+  var id = parseInt(document.getElementById('tacticPlayerId').value);
+  var p = roster.find(function(x){ return x.id===id; });
+  if(!p) return;
+  var newNum = document.getElementById('tacticPlayerNum').value.trim();
+  var newPos = document.getElementById('tacticPlayerPos').value;
+  if(newNum !== '') p.num = newNum;
+  p.pos = newPos;
+  renderRoster();
+  renderPitch();
+  closeModal('modalTacticPlayer');
+}
+// ════════════════════════════════════════════════════════
 </script>
+
+<!-- MODAL TACTIQUE JOUEUR -->
+<div class="modal-overlay" id="modalTacticPlayer">
+  <div class="modal">
+    <div class="modal-title">🎽 Modifier position</div>
+    <input type="hidden" id="tacticPlayerId">
+    <div class="input-row">
+      <div class="input-label">Numéro de maillot</div>
+      <input class="input-field" id="tacticPlayerNum" type="number" min="0" max="99" placeholder="N°">
+    </div>
+    <div class="input-row">
+      <div class="input-label">Poste sur le terrain</div>
+      <select class="input-field" id="tacticPlayerPos">
+        <option value="GK">Gardien (GK)</option>
+        <option value="DC">Défenseur Central (DC)</option>
+        <option value="DL">Défenseur Latéral G (DL)</option>
+        <option value="DR">Défenseur Latéral D (DR)</option>
+        <option value="MDC">Milieu Défensif (MDC)</option>
+        <option value="MC">Milieu Central (MC)</option>
+        <option value="MO">Milieu Offensif (MO)</option>
+        <option value="MG">Milieu Gauche (MG)</option>
+        <option value="MD">Milieu Droit (MD)</option>
+        <option value="AG">Ailier Gauche (AG)</option>
+        <option value="AD">Ailier Droit (AD)</option>
+        <option value="ATT">Attaquant (ATT)</option>
+      </select>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-modal-cancel" onclick="closeModal('modalTacticPlayer')">Annuler</button>
+      <button class="btn-modal-confirm" onclick="confirmTacticPlayer()">✓ APPLIQUER</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
