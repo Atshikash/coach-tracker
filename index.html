@@ -144,11 +144,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 
 /* ── JERSEY TOKENS ── */
 .player-token{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;z-index:10;}
-.jersey-wrap{position:relative;width:36px;height:36px;}
-.jersey-wrap svg{width:36px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));}
+.jersey-wrap{position:relative;width:44px;height:44px;}
+.jersey-wrap svg{width:44px;height:44px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));}
 .jersey-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-44%);font-family:'Bebas Neue',sans-serif;font-size:10px;line-height:1;color:#000;pointer-events:none;}
 .jersey-num.light{color:#fff;}
-.token-name{font-family:'Rajdhani',sans-serif;font-size:8px;font-weight:700;color:#fff;letter-spacing:.3px;text-shadow:0 1px 4px rgba(0,0,0,1),0 0 8px rgba(0,0,0,1);max-width:42px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
+.token-name{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;color:#fff;letter-spacing:.3px;text-shadow:0 1px 4px rgba(0,0,0,1),0 0 8px rgba(0,0,0,1);max-width:50px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
 /* ── SECTION TITLE UPDATE ── */
 .section-title{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;display:flex;align-items:center;gap:7px;}
 .section-title::before{content:'';width:2px;height:11px;background:var(--accent);border-radius:1px;display:inline-block;flex-shrink:0;}
@@ -1053,10 +1053,9 @@ select:focus {
         <button class="importStatusBtn" id="ist-bench" onclick="setImportStatus('bench',this)">💺 Banc</button>
       </div>
     </div>
-    <div id="importCMCount" style="font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--muted);margin:6px 0;"></div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--muted);margin:8px 0 4px;letter-spacing:1px;">👆 TAPE SUR UN JOUEUR POUR L'AJOUTER</div>
     <div class="modal-buttons">
-      <button class="btn-modal-cancel" onclick="closeModal('modalImportCM')">Annuler</button>
-      <button class="btn-modal-confirm" id="btnConfirmImport" style="opacity:0.5;" onclick="confirmImportCM()">✅ IMPORTER</button>
+      <button class="btn-modal-cancel" onclick="closeModal('modalImportCM')">Fermer</button>
     </div>
   </div>
 </div>
@@ -1663,7 +1662,7 @@ select:focus {
 var matchLocation='domicile'; // 'domicile', 'exterieur', 'neutre'
 let timerInterval=null, seconds=0, isRunning=false;
 let currentHalf=1, halfDuration=45;
-let events=[], counts={};
+let events=[], counts={}, half1Counts={}, half2Counts={};
 let scoreHome=0, scoreAway=0;
 let selectedZone=null, pendingCardType='';
 let currentFormat=11, selectedTactic=null;
@@ -1887,12 +1886,14 @@ function clearLog(){if(confirm('Effacer tout le journal ?')){events=[];renderLog
 // ===== ACTIONS =====
 function incrementCount(key){
   counts[key]=(counts[key]||0)+1;
+  if(currentHalf===1){ half1Counts[key]=(half1Counts[key]||0)+1; }
+  else { half2Counts[key]=(half2Counts[key]||0)+1; }
   const el=document.getElementById('cnt-'+key);
   if(el)el.textContent=counts[key];
 }
 function logAction(name,icon,key){
   if(key)incrementCount(key);
-  addEventToLog(icon,name);
+  addEventToLog(icon,name,'',key||'');
 }
 
 // ===== GENERIC ACTION MODAL =====
@@ -1946,7 +1947,7 @@ function confirmActionModal(withPlayer){
     if(p2) text+=` (${label2}: ${p2})`;
   }
   incrementCount(key);
-  addEventToLog(icon,text,'',actionKey,withPlayer?roster.find(p=>p.name===text.split(' ')[1])?.id||'':'');
+  addEventToLog(icon,text,'',key||'',withPlayer?roster.find(p=>p.name===text.split(' ')[1])?.id||'':'');
   closeModal('modalAction');
 }
 
@@ -2300,10 +2301,14 @@ function confirmCentre(withDetail){
   closeModal('modalCentre');
 }
 function makeJerseySVG(color, numColor, num) {
+  var n = (num !== undefined && num !== null && String(num).trim() !== '') ? String(num) : '';
+  // Always use white text with black outline for maximum visibility
+  var txtColor = '#fff';
+  var strokeClr = 'rgba(0,0,0,0.8)';
   return '<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">'
-    + '<path d="M8 10 L2 18 L8 20 L8 36 L32 36 L32 20 L38 18 L32 10 C28 8 26 6 20 6 C14 6 12 8 8 10Z" fill="' + color + '" stroke="rgba(0,0,0,0.5)" stroke-width="1.5"/>'
-    + '<path d="M14 7 C14 12 26 12 26 7" fill="rgba(255,255,255,0.15)"/>'
-    + '<text x="20" y="25" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="12" fill="' + numColor + '">' + num + '</text>'
+    + '<path d="M8 10 L2 18 L8 20 L8 36 L32 36 L32 20 L38 18 L32 10 C28 8 26 6 20 6 C14 6 12 8 8 10Z" fill="' + color + '" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>'
+    + '<path d="M14 7 C14 12 26 12 26 7" fill="rgba(255,255,255,0.2)"/>'
+    + (n ? '<text x="20" y="27" text-anchor="middle" dominant-baseline="middle" font-family="Arial Black,Arial,sans-serif" font-size="13" font-weight="900" stroke="' + strokeClr + '" stroke-width="3" paint-order="stroke" fill="' + txtColor + '">' + n + '</text>' : '')
     + '</svg>';
 }
 function renderPitch(){
@@ -2328,8 +2333,9 @@ function renderPitch(){
     var player=pid?roster.find(function(x){return x.id===pid;}):null;
     // Show green for any assigned player
     var isActive=player!=null;
-    var jerseyColor=isActive?'#00E676':'#3a3a3a';
-    var numColor=isActive?'#000':'#888';
+    var isGK = slot.pos==='GK';
+    var jerseyColor=isActive?(isGK?gkJerseyColor:teamJerseyColor):'#3a3a3a';
+    var numColor='#fff'; // always white with dark outline
     var num=player?player.num:'';
     var shortName=player?player.name.split(' ').pop().substring(0,8):slot.pos;
     var labelColor=isActive?'#fff':'#555';
@@ -2635,7 +2641,7 @@ function confirmTirCadre(withDetail){
     if(passeur)text+=` (passe: ${passeur})`;
   }
   incrementCount('TIR_CADRE');
-  addEventToLog('🎯',text);
+  addEventToLog('🎯',text,'','TIR_CADRE');
   closeModal('modalTirCadre');
 }
 
@@ -2664,7 +2670,7 @@ function confirmTirRate(withDetail){
     if(_trDest)text+=` (${_trDest})`;
   }
   incrementCount('TIR_NON_CADRE');
-  addEventToLog('↗️',text);
+  addEventToLog('↗️',text,'','TIR_NON_CADRE');
   closeModal('modalTirRate');
 }
 
@@ -3012,7 +3018,7 @@ function applySetup(silent){
 }
 function fullReset(){
   if(!confirm('Effacer tout et recommencer ?'))return;
-  events=[];counts={};substitutions=[];roster=[];oppRoster=[];oppEvents=[];
+  events=[];counts={};half1Counts={};half2Counts={};substitutions=[];roster=[];oppRoster=[];oppEvents=[];pitchAssignment={};teamJerseyColor='#00E676';gkJerseyColor='#FFD700';
   scoreHome=0;scoreAway=0;seconds=0;currentHalf=1;selectedTactic=null;selectedZone=null;
   pauseTimer();updateTimerDisplay();
   document.getElementById('scoreHomeEl').textContent='0';
@@ -3539,9 +3545,10 @@ function buildAnalyse() {
     ['🔥 Occasions','OCCASION'],['💔 Pertes','PERTE'],['💪 Récups','RECUP'],
     ['🟨 Cartons J','JAUNE'],['🔗 Séquences','SEQ']
   ];
-  function countHalf(evts, key) {
-    if (key === 'SEQ') return evts === half1Events ? half1Seqs.length : half2Seqs.length;
-    return evts.filter(function(e) { return e.type === key; }).length;
+  function countHalf(half, key) {
+    if (key === 'SEQ') return half===1 ? half1Seqs.length : half2Seqs.length;
+    var h = half===1 ? half1Counts : half2Counts;
+    return h[key] || 0;
   }
   var compHtml = '<div class="section-title" style="margin-top:0">⚖️ Comparaison 1ère MT / 2ème MT</div>';
   compHtml += '<div style="display:grid;grid-template-columns:1fr 80px 1fr;gap:4px;align-items:center;margin-bottom:16px;">';
@@ -3549,8 +3556,8 @@ function buildAnalyse() {
   compHtml += '<div></div>';
   compHtml += '<div style="text-align:center;font-family:var(--fd);font-size:11px;font-weight:900;color:var(--green);padding:6px">2ÈME MT</div>';
   statsKeys.forEach(function(sk) {
-    var v1 = countHalf(half1Events, sk[1]);
-    var v2 = countHalf(half2Events, sk[1]);
+    var v1 = countHalf(1, sk[1]);
+    var v2 = countHalf(2, sk[1]);
     var c1 = v1 > v2 ? 'color:var(--accent)' : v1 === v2 ? '' : 'color:var(--muted)';
     var c2 = v2 > v1 ? 'color:var(--green)' : v2 === v1 ? '' : 'color:var(--muted)';
     compHtml += '<div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--fd);font-size:20px;font-weight:900;' + c1 + '">' + v1 + '</div></div>';
@@ -3821,45 +3828,43 @@ function openImportCMModal() {
   document.querySelectorAll('.importStatusBtn').forEach(function(b){b.classList.remove('sel');});
   var istField = document.getElementById('ist-field');
   if(istField) istField.classList.add('sel');
-  var note = document.getElementById('importCMNote');
-  if(note) note.textContent = '';
-  var cmRaw = localStorage.getItem('cm2_clubs');
   var clubList = document.getElementById('importCMClubSelect');
   var playerList = document.getElementById('importCMPlayerList');
-  if(!cmRaw) {
-    clubList.innerHTML = '';
-    playerList.innerHTML = '<div style="font-family:var(--fd);font-size:12px;color:var(--muted);text-align:center;padding:16px;">Aucun club dans Club Manager. Crée un club et ajoute des joueurs.</div>';
+  // Use integrated ct_club data
+  var d = loadClubData();
+  var players = clubPlayers();
+  var existingIds = roster.map(function(r){ return Number(r.id); });
+  if(clubList) clubList.innerHTML = '<div style="font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">📥 ' + (d.name||'Mon Club') + ' — Football à ' + _clubFormat + '</div>';
+  if(!players.length) {
+    if(playerList) playerList.innerHTML = '<div style="font-family:var(--fd);font-size:12px;color:var(--muted);text-align:center;padding:20px;letter-spacing:1px;text-transform:uppercase;">Aucun joueur dans le Club.<br>Va dans l\'onglet Club pour en ajouter.</div>';
     document.getElementById('modalImportCM').classList.add('open');
     return;
   }
-  var clubs = JSON.parse(cmRaw);
-  if(!clubs.length) {
-    clubList.innerHTML = '';
-    playerList.innerHTML = '<div style="font-family:var(--fd);font-size:12px;color:var(--muted);text-align:center;padding:16px;">Aucun club trouvé.</div>';
-    document.getElementById('modalImportCM').classList.add('open');
-    return;
+  if(playerList) {
+    playerList.innerHTML = '';
+    var list = document.createElement('div');
+    list.style.cssText = 'display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;';
+    players.sort(function(a,b){ return (parseInt(a.num)||99)-(parseInt(b.num)||99); }).forEach(function(p) {
+      var fullName = ((p.prenom||'') + ' ' + (p.nom||'')).trim() || 'Joueur';
+      var pid = Number(p.id);
+      var already = existingIds.indexOf(pid) >= 0;
+      var card = document.createElement('div');
+      card.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:2px solid ' + (already?'var(--accent)':'var(--border)') + ';border-radius:10px;cursor:' + (already?'default':'pointer') + ';opacity:' + (already?'0.5':'1') + ';';
+      card.dataset.pid = pid; card.dataset.num = p.num||''; card.dataset.name = fullName; card.dataset.pos = p.poste||'';
+      if(!already) card.onclick = function(){ toggleImportPlayer(this.dataset.pid, this.dataset.num, this.dataset.name, this.dataset.pos); };
+      var numEl = document.createElement('div');
+      numEl.style.cssText = 'font-family:var(--fd);font-size:18px;font-weight:900;color:var(--accent);min-width:34px;text-align:center;';
+      numEl.textContent = p.num||'?';
+      var info = document.createElement('div'); info.style.flex='1';
+      var nameEl = document.createElement('div'); nameEl.style.cssText='font-family:var(--fd);font-size:14px;font-weight:700;'; nameEl.textContent=fullName;
+      var posEl = document.createElement('div'); posEl.style.cssText='font-family:var(--fd);font-size:10px;color:var(--muted);'; posEl.textContent=p.poste||'';
+      info.appendChild(nameEl); info.appendChild(posEl);
+      var badge = document.createElement('div'); badge.style.cssText='font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:1px;color:'+(already?'var(--accent)':'var(--muted)')+';'; badge.textContent=already?'✓':'+ AJOUTER';
+      card.appendChild(numEl); card.appendChild(info); card.appendChild(badge);
+      list.appendChild(card);
+    });
+    playerList.appendChild(list);
   }
-  // Build club selector using DOM
-  clubList.innerHTML = '';
-  var clabel = document.createElement('div');
-  clabel.style.cssText = 'font-family:var(--fd);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;';
-  clabel.textContent = 'CLUB';
-  clubList.appendChild(clabel);
-  var cbtns = document.createElement('div');
-  cbtns.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;';
-  clubs.forEach(function(c) {
-    var btn = document.createElement('button');
-    btn.id = 'iclub-' + c.id;
-    btn.style.cssText = 'padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-family:var(--fd);font-size:12px;font-weight:700;cursor:pointer;color:var(--text);';
-    btn.textContent = c.name || 'Club';
-    btn.dataset.cid = c.id;
-    btn.onclick = function(){ selectImportClub(this.dataset.cid); };
-    cbtns.appendChild(btn);
-  });
-  clubList.appendChild(cbtns);
-  // Auto-select if only one club
-  if(clubs.length === 1) { _importClubId = clubs[0].id; renderImportPlayers(clubs[0]); }
-  else { playerList.innerHTML = '<div style="font-family:var(--fd);font-size:11px;color:var(--muted);text-align:center;padding:8px;">Sélectionne un club</div>'; }
   document.getElementById('modalImportCM').classList.add('open');
 }
 
@@ -3959,19 +3964,24 @@ function renderImportPlayers(club) {
 }
 
 function toggleImportPlayer(id, num, name, pos) {
+  // Convert poste (full name) to pos code if needed
+  var posCode = (typeof posFromPoste === 'function') ? posFromPoste(pos) : (pos || 'MC');
+  if(!posCode || posCode === pos) posCode = pos || 'MC'; // fallback if posFromPoste returns unchanged
   // 1 clic = importé immédiatement dans l'effectif
-  var exists = roster.find(function(r){ return r.id === id || r.name.toLowerCase().trim() === name.toLowerCase().trim(); });
+  var idNum = Number(id);
+  var exists = roster.find(function(r){ return Number(r.id) === idNum; });
   if(exists){
     closeModal('modalImportCM');
     return;
   }
   roster.push({
-    id: id,
-    num: num, name: name, pos: pos,
+    id: idNum,
+    num: num || '?', name: name || '?', pos: posCode,
     status: _importStatus,
     entryTime: _importStatus==='field' ? seconds : null,
     totalSeconds: 0
   });
+  pitchAssignment = {}; // reset so new player gets auto-placed
   renderRoster();
   if(selectedTactic !== null) renderPitch();
   closeModal('modalImportCM');
@@ -4040,6 +4050,8 @@ var _clubHealthStatus = 'injured';
 var _editClubPlayerId = null;
 var _pitchSelectedId = null;
 var pitchAssignment = {}; // slotIndex -> playerId
+var teamJerseyColor = '#00E676'; // couleur maillot équipe
+var gkJerseyColor = '#FFD700';   // couleur maillot gardien
 
 function loadClubData() {
   var d = localStorage.getItem('ct_club');
@@ -4445,88 +4457,7 @@ function resetClubData() {
 }
 
 // IMPORT DEPUIS CLUB (pour le match en cours)
-function openImportCMModal() {
-  var players = clubPlayers().filter(function(p){ return !p.status || p.status === 'ok'; });
-  var list = document.getElementById('importCMPlayerList');
-  var clubSel = document.getElementById('importCMClubSelect');
-  var note = document.getElementById('importCMNote');
-  _importSelectedPlayers = [];
-  _importStatus = 'field';
-  document.querySelectorAll('.importStatusBtn').forEach(function(b){ b.classList.remove('sel'); });
-  var istField = document.getElementById('ist-field');
-  if (istField) istField.classList.add('sel');
-  if (note) note.textContent = '';
-
-  if (!players.length) {
-    if (clubSel) clubSel.innerHTML = '<div style="font-family:\'Rajdhani\',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Aucun joueur dans le module Club (Format ' + _clubFormat + ')</div>';
-    if (list) list.innerHTML = '';
-    document.getElementById('modalImportCM').classList.add('open');
-    return;
-  }
-
-  if (clubSel) {
-    var d = loadClubData();
-    clubSel.innerHTML = '<div style="font-family:\'Rajdhani\',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">📥 Import depuis : ' + (d.name||'Mon Club') + ' — Football à ' + _clubFormat + '</div>';
-  }
-
-  // Show already imported players
-  var existingIds = roster.map(function(r){ return r.id; });
-  if (list) list.innerHTML = players.map(function(p) {
-    var already = existingIds.indexOf(p.id) >= 0;
-    var fullName = (p.prenom ? p.prenom + ' ' : '') + p.nom;
-    return '<div id="imp-' + p.id + '" onclick="' + (already ? '' : 'toggleImportPlayer(\'' + p.id + '\')') + '" style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:6px;cursor:' + (already?'default':'pointer') + ';opacity:' + (already?'0.4':'1') + ';">' +
-      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:rgba(0,230,118,0.5);min-width:28px;">' + (p.num||'') + '</div>' +
-      '<div style="flex:1;"><div style="font-family:\'Rajdhani\',sans-serif;font-size:14px;font-weight:700;">' + fullName + '</div>' +
-      '<div style="font-family:\'Rajdhani\',sans-serif;font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;">' + (p.poste||'') + '</div></div>' +
-      (already ? '<div style="font-family:\'Rajdhani\',sans-serif;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;">DÉJÀ AJOUTÉ</div>' : '<div id="imp-chk-' + p.id + '" style="width:20px;height:20px;border:2px solid var(--border);border-radius:4px;"></div>') +
-    '</div>';
-  }).join('');
-
-  document.getElementById('modalImportCM').classList.add('open');
-}
-
-function toggleImportPlayer(pid) {
-  var idx = _importSelectedPlayers.indexOf(pid);
-  var chk = document.getElementById('imp-chk-' + pid);
-  var row = document.getElementById('imp-' + pid);
-  if (idx >= 0) {
-    _importSelectedPlayers.splice(idx, 1);
-    if (chk) { chk.style.background = ''; chk.style.borderColor = 'var(--border)'; chk.textContent = ''; }
-    if (row) row.style.background = 'var(--surface2)';
-  } else {
-    _importSelectedPlayers.push(pid);
-    if (chk) { chk.style.background = 'var(--accent)'; chk.style.borderColor = 'var(--accent)'; chk.textContent = '✓'; chk.style.color='#000'; chk.style.textAlign='center'; chk.style.lineHeight='18px'; chk.style.fontSize='12px'; }
-    if (row) row.style.background = 'rgba(0,230,118,0.05)';
-  }
-  var cnt = document.getElementById('importCMCount');
-  if (cnt) cnt.textContent = _importSelectedPlayers.length + ' joueur(s) sélectionné(s)';
-}
-
-function confirmImportCM() {
-  if (!_importSelectedPlayers.length) { alert('Sélectionne au moins un joueur.'); return; }
-  var players = clubPlayers();
-  var added = 0;
-  _importSelectedPlayers.forEach(function(pid) {
-    var p = players.find(function(x){ return x.id === pid; });
-    if (!p) return;
-    if (roster.find(function(r){ return r.id === pid; })) return;
-    roster.push({
-      id: p.id,
-      num: p.num || '',
-      name: (p.prenom ? p.prenom + ' ' : '') + p.nom,
-      pos: posFromPoste(p.poste),
-      status: _importStatus,
-      entryTime: _importStatus === 'field' ? seconds : null,
-      totalSeconds: 0
-    });
-    added++;
-  });
-  saveRoster();
-  closeModal('modalImportCM');
-  renderRoster();
-  if (typeof renderPitch === 'function') renderPitch();
-  alert('✅ ' + added + ' joueur(s) importé(s) dans le match.');
-}
+// openImportCMModal, toggleImportPlayer, confirmImportCM — all defined above
 
 function posFromPoste(poste) {
   var map = {
@@ -4543,8 +4474,8 @@ function initClubModule() {
 }
 
 // Init Club
-initClubModule();
-  updateLocationBadge();
+window.addEventListener('load', function(){ try{initClubModule();}catch(e){console.warn('initClub',e);} });
+  // updateLocationBadge called in load event above
 
 // ===== EXPORT / IMPORT DONNÉES =====
 function exportAllData() {
@@ -4764,7 +4695,6 @@ var _tacticSlotIndex = null;
 
 function openTacticSlotModal(slotIdx, slotPos){
   _tacticSlotIndex = slotIdx;
-  // Build player selector — all roster players
   var sel = document.getElementById('tacticPlayerSelect');
   if(!sel){ console.error('tacticPlayerSelect not found'); return; }
   sel.innerHTML = '<option value="">— Aucun —</option>';
@@ -4776,12 +4706,32 @@ function openTacticSlotModal(slotIdx, slotPos){
     if(Number(pitchAssignment[slotIdx])===Number(p.id)) opt.selected=true;
     sel.appendChild(opt);
   });
-  // Update num when player changes
   updateTacticNum();
-  // Show slot pos label
   var lbl = document.getElementById('tacticSlotPosLabel');
-  if(lbl) lbl.textContent = 'Poste dans la tactique : '+slotPos;
+  if(lbl) lbl.textContent = 'Poste : '+slotPos;
+  // Sync color pickers
+  var tc = document.getElementById('teamColorPicker');
+  var gc = document.getElementById('gkColorPicker');
+  if(tc) tc.value = teamJerseyColor;
+  if(gc) gc.value = gkJerseyColor;
+  updateColorPreviews();
   document.getElementById('modalTacticPlayer').classList.add('open');
+}
+
+function updateColorPreviews(){
+  var tp = document.getElementById('teamColorPreview');
+  var gp = document.getElementById('gkColorPreview');
+  if(tp) tp.style.background = teamJerseyColor;
+  if(gp) gp.style.background = gkJerseyColor;
+}
+
+function applyJerseyColors(){
+  var tc = document.getElementById('teamColorPicker');
+  var gc = document.getElementById('gkColorPicker');
+  if(tc) teamJerseyColor = tc.value;
+  if(gc) gkJerseyColor = gc.value;
+  updateColorPreviews();
+  renderPitch();
 }
 
 function updateTacticNum(){
@@ -4833,6 +4783,42 @@ function confirmTacticPlayer(){
       <div class="input-label">Numéro de maillot</div>
       <input class="input-field" id="tacticPlayerNum" type="number" min="0" max="99" placeholder="N°">
     </div>
+
+    <!-- Couleurs maillots -->
+    <div style="margin:12px 0 6px;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">🎨 Couleurs des maillots</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div>
+        <div style="font-family:var(--fd);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">ÉQUIPE</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="teamColorPreview" style="width:36px;height:36px;border-radius:8px;border:2px solid var(--border);flex-shrink:0;"></div>
+          <input type="color" id="teamColorPicker" value="#00E676" oninput="teamJerseyColor=this.value;updateColorPreviews();renderPitch();" style="width:100%;height:36px;border:none;border-radius:8px;cursor:pointer;background:none;">
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--fd);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">GARDIEN</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="gkColorPreview" style="width:36px;height:36px;border-radius:8px;border:2px solid var(--border);flex-shrink:0;"></div>
+          <input type="color" id="gkColorPicker" value="#FFD700" oninput="gkJerseyColor=this.value;updateColorPreviews();renderPitch();" style="width:100%;height:36px;border:none;border-radius:8px;cursor:pointer;background:none;">
+        </div>
+      </div>
+    </div>
+    <!-- Palette rapide équipe -->
+    <div style="margin-bottom:14px;">
+      <div style="font-family:var(--fd);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">COULEURS RAPIDES</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <button onclick="teamJerseyColor='#00E676';document.getElementById('teamColorPicker').value='#00E676';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#00E676;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#FF3B3B';document.getElementById('teamColorPicker').value='#FF3B3B';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#FF3B3B;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#2979FF';document.getElementById('teamColorPicker').value='#2979FF';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#2979FF;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#FF6D00';document.getElementById('teamColorPicker').value='#FF6D00';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#FF6D00;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#FFFFFF';document.getElementById('teamColorPicker').value='#FFFFFF';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#FFFFFF;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#000000';document.getElementById('teamColorPicker').value='#000000';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#000000;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#9C27B0';document.getElementById('teamColorPicker').value='#9C27B0';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#9C27B0;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#FFD700';document.getElementById('teamColorPicker').value='#FFD700';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#FFD700;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#00BCD4';document.getElementById('teamColorPicker').value='#00BCD4';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#00BCD4;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+        <button onclick="teamJerseyColor='#8BC34A';document.getElementById('teamColorPicker').value='#8BC34A';updateColorPreviews();renderPitch();" style="width:28px;height:28px;background:#8BC34A;border:2px solid rgba(255,255,255,0.2);border-radius:6px;cursor:pointer;"></button>
+      </div>
+    </div>
+
     <div class="modal-buttons">
       <button class="btn-modal-cancel" onclick="closeModal('modalTacticPlayer')">Annuler</button>
       <button class="btn-modal-confirm" onclick="confirmTacticPlayer()">✓ APPLIQUER</button>
