@@ -144,11 +144,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 
 /* ── JERSEY TOKENS ── */
 .player-token{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;z-index:10;}
-.jersey-wrap{position:relative;width:28px;height:28px;}
-.jersey-wrap svg{width:28px;height:28px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7));}
+.jersey-wrap{position:relative;width:36px;height:36px;}
+.jersey-wrap svg{width:36px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));}
 .jersey-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-44%);font-family:'Bebas Neue',sans-serif;font-size:10px;line-height:1;color:#000;pointer-events:none;}
 .jersey-num.light{color:#fff;}
-.token-name{font-family:'Rajdhani',sans-serif;font-size:7px;font-weight:700;color:#fff;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,1);max-width:36px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;}
+.token-name{font-family:'Rajdhani',sans-serif;font-size:8px;font-weight:700;color:#fff;letter-spacing:.3px;text-shadow:0 1px 4px rgba(0,0,0,1),0 0 8px rgba(0,0,0,1);max-width:42px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
 /* ── SECTION TITLE UPDATE ── */
 .section-title{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;display:flex;align-items:center;gap:7px;}
 .section-title::before{content:'';width:2px;height:11px;background:var(--accent);border-radius:1px;display:inline-block;flex-shrink:0;}
@@ -464,6 +464,7 @@ select:focus {
     <button class="btn-timer btn-reset" onclick="resetTimer()">↺</button>
   </div>
   <div class="half-badge" id="halfBadge">1ère MT</div>
+  <div id="locationBadge" style="background:rgba(0,230,118,0.15);border:1px solid rgba(0,230,118,0.35);border-radius:4px;padding:4px 8px;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">🏠 DOMICILE</div>
 </div>
 
 <!-- BANNER SETUP RAPIDE -->
@@ -999,6 +1000,14 @@ select:focus {
     <div class="input-row"><div class="input-label">Ton équipe</div><input class="input-field" id="setupHome" type="text" placeholder="Ex: FC Lyon" maxlength="20"></div>
     <div class="input-row"><div class="input-label">Adversaire</div><input class="input-field" id="setupAway" type="text" placeholder="Ex: AS Montpellier" maxlength="20"></div>
     <div class="input-row"><div class="input-label">Compétition / Date</div><input class="input-field" id="setupComp" type="text" placeholder="Ex: Championnat J12"></div>
+    <div class="input-row" style="margin-top:8px;">
+      <div class="input-label">Lieu du match</div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="dur-btn sel" id="loc-domicile" onclick="setMatchLocation('domicile',this)">🏠 Domicile</button>
+        <button class="dur-btn" id="loc-exterieur" onclick="setMatchLocation('exterieur',this)">✈️ Extérieur</button>
+        <button class="dur-btn" id="loc-neutre" onclick="setMatchLocation('neutre',this)">⚖️ Neutre</button>
+      </div>
+    </div>
     <button class="btn-modal-confirm" style="width:100%;margin-top:8px;" onclick="applySetup()">✓ APPLIQUER</button>
   </div>
   <div class="setup-card">
@@ -1631,11 +1640,26 @@ select:focus {
       <button class="btn-modal-cancel" onclick="closeModal('modalEditPlayer')">Annuler</button>
       <button class="btn-modal-confirm" onclick="confirmEditPlayer()">✓ SAUVER</button>
     </div>
+  
+  <div class="setup-card">
+    <div class="section-title" style="margin-top:0">💾 Sauvegarde des données</div>
+    <div style="font-family:var(--fb);font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+      Exporte tes données avant chaque mise à jour de l'app.<br>
+      L'import restaure : effectif Club, joueurs, stats et historique.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <button class="btn-modal-confirm" style="background:linear-gradient(135deg,#0047ab,#0095cc);" onclick="exportSauvegarde()">📤 EXPORTER</button>
+      <button class="btn-modal-confirm" style="background:linear-gradient(135deg,#6a0dad,#9b30d8);" onclick="document.getElementById('importSauvegardeFile').click()">📥 IMPORTER</button>
+    </div>
+    <input type="file" id="importSauvegardeFile" accept=".json" style="display:none" onchange="importSauvegarde(event)">
+    <div style="font-family:var(--fb);font-size:10px;color:rgba(255,107,0,0.8);margin-top:4px;">⚠️ L'import remplace les données existantes</div>
   </div>
+</div>
 </div>
 
 <script>
 // ===== STATE =====
+var matchLocation='domicile'; // 'domicile', 'exterieur', 'neutre'
 let timerInterval=null, seconds=0, isRunning=false;
 let currentHalf=1, halfDuration=45;
 let events=[], counts={};
@@ -2011,7 +2035,7 @@ function confirmAddPlayer(){
   const status=document.getElementById('newPlayerStatus').value;
   if(!name){alert('Nom requis');return;}
   roster.push({id:Date.now(),num:num||'?',name,pos,status,entryTime:status==='field'?seconds:null,totalSeconds:0});
-  renderRoster();if(selectedTactic!==null)renderPitch();
+  saveRoster();renderRoster();if(selectedTactic!==null)renderPitch();
   closeModal('modalAddPlayer');
 }
 function openEditPlayerModal(id){
@@ -2045,14 +2069,16 @@ function confirmEditPlayer(){
 function deletePlayer(id){
   if(!confirm('Supprimer ce joueur ?'))return;
   roster=roster.filter(p=>p.id!==id);
-  renderRoster();if(selectedTactic!==null)renderPitch();
+  saveRoster();renderRoster();if(selectedTactic!==null)renderPitch();
   closeModal('modalEditPlayer');
 }
 function calcPlaytime(p){
   if(p.status==='bench')return 0;
-  if(p.status==='out')return p.totalSeconds;
-  if(p.status==='suspended')return p.totalSeconds+(p.entryTime!=null?seconds-p.entryTime:0); // still counts but frozen at suspension start - handled via entryTime freeze
-  return p.totalSeconds+(p.entryTime!=null?seconds-p.entryTime:0);
+  if(p.status==='out')return p.totalSeconds||0;
+  var base=p.totalSeconds||0;
+  var extra=(p.entryTime!=null&&!isNaN(p.entryTime))?(seconds-p.entryTime):0;
+  if(extra<0)extra=0;
+  return base+extra;
 }
 function tickPlaytimes(){
   checkSuspensions();
@@ -2082,11 +2108,11 @@ function renderRoster(){
       <div class="player-num">${p.num}</div>
       <div class="player-info">
         <div class="player-pname">${p.name}</div>
-        <div class="player-pos">${p.pos}${p.status!=='bench'?` · ${mins}min`:''}</div>
+        <div class="player-pos">${p.pos}${p.status!=='bench'?` · ${isNaN(mins)?0:mins}min`:''}</div>
         ${p.status!=='bench'?`<div class="playtime-bar-wrap"><div class="playtime-bar-fill" style="width:${pct}%"></div></div>`:''}
       </div>
       ${statusHtml}
-      <button class="btn-sub" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:15px;padding:6px 8px;" onclick="openEditPlayerModal(${p.id})">✏️</button>
+      <button class="btn-sub" style="background:rgba(0,184,255,0.15);border:1px solid rgba(0,184,255,0.3);color:var(--blue);font-size:16px;padding:8px 10px;min-width:40px;" onclick="openEditPlayerModal(${p.id})">✏️</button>
       ${subBtn}
     </div>`;
   }).join('');
@@ -2933,11 +2959,50 @@ function confirmScoreEdit(){
 }
 
 // ===== SETUP =====
+function setMatchLocation(loc, el) {
+  matchLocation = loc;
+  document.querySelectorAll('#btnDomicile,#btnExterieur,#btnNeutre').forEach(function(b){ b.classList.remove('sel'); });
+  if(el) el.classList.add('sel');
+  updateLocationBadge();
+}
+
+function setMatchLocation(loc, el) {
+  matchLocation = loc;
+  document.querySelectorAll('#loc-domicile,#loc-exterieur,#loc-neutre').forEach(function(b){ b.classList.remove('sel'); });
+  if(el) el.classList.add('sel');
+  updateLocationBadge();
+  // Swap score display if extérieur (nous = right side)
+  var homeNameEl = document.getElementById('teamHomeName');
+  var awayNameEl = document.getElementById('teamAwayName');
+  if(homeNameEl && awayNameEl) {
+    var setupHome = document.getElementById('setupHome');
+    var setupAway = document.getElementById('setupAway');
+    var homeName = (setupHome ? setupHome.value.trim() : '') || 'NOUS';
+    var awayName = (setupAway ? setupAway.value.trim() : '') || 'ADV';
+    homeNameEl.textContent = homeName.substring(0,8).toUpperCase();
+    awayNameEl.textContent = awayName.substring(0,8).toUpperCase();
+  }
+}
+
+function updateLocationBadge() {
+  var badge = document.getElementById('locationBadge');
+  if(!badge) return;
+  var icons = {domicile:'🏠', exterieur:'✈️', neutre:'⚖️'};
+  var labels = {domicile:'DOMICILE', exterieur:'EXTÉRIEUR', neutre:'NEUTRE'};
+  var colors = {domicile:'rgba(0,230,118,0.15)', exterieur:'rgba(0,184,255,0.15)', neutre:'rgba(255,214,0,0.15)'};
+  var borderColors = {domicile:'rgba(0,230,118,0.35)', exterieur:'rgba(0,184,255,0.35)', neutre:'rgba(255,214,0,0.35)'};
+  var textColors = {domicile:'var(--accent)', exterieur:'var(--blue)', neutre:'var(--yellow)'};
+  badge.textContent = icons[matchLocation] + ' ' + labels[matchLocation];
+  badge.style.background = colors[matchLocation];
+  badge.style.borderColor = borderColors[matchLocation];
+  badge.style.color = textColors[matchLocation];
+}
 function applySetup(silent){
   const home=document.getElementById('setupHome').value.trim()||'NOUS';
   const away=document.getElementById('setupAway').value.trim()||'ADV';
   document.getElementById('teamHomeName').textContent=home.substring(0,8).toUpperCase();
   document.getElementById('teamAwayName').textContent=away.substring(0,8).toUpperCase();
+  updateLocationBadge();
   if(!silent)alert('✓ Appliqué !');
 }
 function fullReset(){
@@ -3003,6 +3068,7 @@ function archiveCurrentMatch() {
     dateTs: Date.now(),
     home: home, away: away, comp: comp, tactic: tac,
     format: currentFormat,
+    location: matchLocation,
     scoreHome: scoreHome, scoreAway: scoreAway,
     counts: JSON.parse(JSON.stringify(counts)),
     events: JSON.parse(JSON.stringify(events)),
@@ -3095,7 +3161,7 @@ function renderHistorique() {
     html += '<div style="display:flex;align-items:center;gap:10px">';
     html += '<div style="background:' + rc + ';color:#000;font-family:var(--fd);font-weight:900;font-size:13px;border-radius:6px;padding:4px 10px">' + res + '</div>';
     html += '<div style="flex:1"><div style="font-family:var(--fd);font-size:15px;font-weight:700">' + m.home + ' <span style="color:var(--accent)">' + m.scoreHome + ' — ' + m.scoreAway + '</span> ' + m.away + '</div>';
-    html += '<div style="font-family:var(--fd);font-size:10px;color:var(--muted);margin-top:2px">' + m.date + (m.comp ? ' · ' + m.comp : '') + '</div></div>';
+    html += '<div style="font-family:var(--fd);font-size:10px;color:var(--muted);margin-top:2px">' + m.date + (m.comp ? ' · ' + m.comp : '') + (m.location ? ' · ' + {domicile:'🏠',exterieur:'✈️',neutre:'⚖️'}[m.location] : '') + '</div></div>';
     html += '<input type="checkbox" style="width:18px;height:18px;cursor:pointer" onclick="event.stopPropagation();toggleCompare(\'' + m.id + '\',this)">';
     html += '</div>';
     html += '<div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
@@ -4440,7 +4506,9 @@ function confirmImportCM() {
       num: p.num || '',
       name: (p.prenom ? p.prenom + ' ' : '') + p.nom,
       pos: posFromPoste(p.poste),
-      status: _importStatus
+      status: _importStatus,
+      entryTime: _importStatus === 'field' ? seconds : null,
+      totalSeconds: 0
     });
     added++;
   });
@@ -4467,17 +4535,220 @@ function initClubModule() {
 
 // Init Club
 initClubModule();
-</script>
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').then(function(reg){
-      console.log('SW registered');
-    }).catch(function(err){
-      console.log('SW error:', err);
-    });
+  updateLocationBadge();
+
+// ===== EXPORT / IMPORT DONNÉES =====
+function exportAllData() {
+  var data = {
+    version: 5,
+    exportDate: new Date().toISOString(),
+    appName: 'Coach Tracker Pro',
+    matchHistory: localStorage.getItem('ct_match_history') || '[]',
+    clubData: localStorage.getItem('ct_club') || 'null',
+    rosterData: localStorage.getItem('ct_roster') || '[]',
+    setupData: {
+      home: document.getElementById('setupHome') ? document.getElementById('setupHome').value : '',
+      away: document.getElementById('setupAway') ? document.getElementById('setupAway').value : '',
+      comp: document.getElementById('setupComp') ? document.getElementById('setupComp').value : '',
+      halfDuration: halfDuration,
+      format: currentFormat,
+      location: matchLocation
+    }
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var d = new Date();
+  a.href = url;
+  a.download = 'coach-tracker-backup-' + d.getDate() + '-' + (d.getMonth()+1) + '-' + d.getFullYear() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  var st = document.getElementById('importStatus');
+  if(st) { st.textContent = 'Donnees exportees !'; st.style.color = 'var(--accent)'; }
+}
+
+function importAllData(event) {
+  var file = event.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if(!data.appName || data.appName !== 'Coach Tracker Pro') {
+        alert('Fichier invalide.');
+        return;
+      }
+      if(!confirm('Importer les donnees ? Effectif, historique et config seront restaures.')) return;
+      if(data.matchHistory) localStorage.setItem('ct_match_history', data.matchHistory);
+      if(data.clubData && data.clubData !== 'null') localStorage.setItem('ct_club', data.clubData);
+      if(data.rosterData) localStorage.setItem('ct_roster', data.rosterData);
+      if(data.setupData) {
+        var s = data.setupData;
+        if(document.getElementById('setupHome')) document.getElementById('setupHome').value = s.home || '';
+        if(document.getElementById('setupAway')) document.getElementById('setupAway').value = s.away || '';
+        if(document.getElementById('setupComp')) document.getElementById('setupComp').value = s.comp || '';
+        if(s.halfDuration) setHalfDuration(s.halfDuration, null);
+        if(s.format) currentFormat = s.format;
+        if(s.location) {
+          matchLocation = s.location;
+          var locBtn = document.getElementById('loc-' + s.location);
+          if(locBtn) setMatchLocation(s.location, locBtn);
+        }
+        applySetup(true);
+      }
+      var storedRoster = localStorage.getItem('ct_roster');
+      if(storedRoster) { try { roster = JSON.parse(storedRoster); } catch(e2) {} }
+      renderRoster();
+      renderHistorique();
+      if(typeof renderClubInfoBar === 'function') renderClubInfoBar();
+      var st = document.getElementById('importStatus');
+      if(st) { st.textContent = 'Import reussi !'; st.style.color = 'var(--accent)'; }
+      alert('Import reussi ! Donnees restaurees.');
+    } catch(err) {
+      alert('Erreur import : ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ══ SAUVEGARDE EXPORT / IMPORT ══════════════════════════
+function exportSauvegarde(){
+  var data = {
+    appName: 'CoachTrackerPro',
+    version: '5.0',
+    exportDate: new Date().toLocaleDateString('fr-FR'),
+    exportTs: Date.now(),
+    // Club + effectif
+    ct_club: localStorage.getItem('ct_club'),
+    // Historique matchs
+    ct_match_history: localStorage.getItem('ct_match_history'),
+    // Effectif match en cours (optionnel)
+    roster: JSON.stringify(roster),
+    // Events match en cours
+    events: JSON.stringify(events),
+    matchLocation: matchLocation,
+    scoreHome: scoreHome,
+    scoreAway: scoreAway,
+    currentFormat: currentFormat,
+    halfDuration: halfDuration,
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'coach-tracker-sauvegarde-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  alert('✅ Sauvegarde exportée !\nGarde ce fichier en lieu sûr avant de mettre à jour l\'app.');
+}
+
+function importSauvegarde(event){
+  var file = event.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if(!data.appName || data.appName !== 'CoachTrackerPro'){
+        alert('❌ Fichier invalide — ce n\'est pas une sauvegarde Coach Tracker Pro.');
+        return;
+      }
+      var msg = '📥 Restaurer la sauvegarde du ' + (data.exportDate||'?') + ' ?\n\n';
+      msg += '✅ Sera restauré :\n• Effectif Club (joueurs, stats, santé)\n• Historique des matchs\n• Match en cours\n\n';
+      msg += '⚠️ Les données actuelles seront remplacées.';
+      if(!confirm(msg)) return;
+      // Restore localStorage keys
+      if(data.ct_club) localStorage.setItem('ct_club', data.ct_club);
+      if(data.ct_match_history) localStorage.setItem('ct_match_history', data.ct_match_history);
+      // Restore in-memory state
+      if(data.roster) { try { roster = JSON.parse(data.roster); } catch(e){} }
+      if(data.events) { try { events = JSON.parse(data.events); } catch(e){} }
+      if(data.matchLocation) matchLocation = data.matchLocation;
+      if(data.scoreHome !== undefined) { scoreHome = data.scoreHome; document.getElementById('scoreHomeEl').textContent = scoreHome; }
+      if(data.scoreAway !== undefined) { scoreAway = data.scoreAway; document.getElementById('scoreAwayEl').textContent = scoreAway; }
+      if(data.currentFormat) currentFormat = data.currentFormat;
+      if(data.halfDuration) halfDuration = data.halfDuration;
+      // Re-render
+      renderRoster();
+      renderHistorique();
+      updateLocationBadge();
+      if(typeof initClubModule === 'function') initClubModule();
+      alert('✅ Sauvegarde restaurée avec succès !\nTon effectif et historique sont de retour.');
+    } catch(err) {
+      alert('❌ Erreur lors de l\'import : ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  // Reset input so same file can be re-imported
+  event.target.value = '';
+}
+// ════════════════════════════════════════════════════════
+
+// ══ SAUVEGARDE EXPORT / IMPORT ══════════════════════════
+function exportSauvegarde(){
+  var data = {
+    appName: 'CoachTrackerPro',
+    version: '5.0',
+    exportDate: new Date().toLocaleDateString('fr-FR'),
+    exportTs: Date.now(),
+    ct_club: localStorage.getItem('ct_club'),
+    ct_match_history: localStorage.getItem('ct_match_history'),
+    roster: JSON.stringify(roster),
+    events: JSON.stringify(events),
+    substitutions: JSON.stringify(substitutions),
+    matchLocation: matchLocation,
+    scoreHome: scoreHome,
+    scoreAway: scoreAway,
+    currentFormat: currentFormat,
+    halfDuration: halfDuration
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url;
+  a.download = 'coach-tracker-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  alert('✅ Sauvegarde exportée !\nGarde ce fichier en lieu sûr avant de mettre à jour l\'app.');
+}
+
+function importSauvegarde(event){
+  var file = event.target.files[0]; if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = JSON.parse(e.target.result);
+      if(!data.appName || data.appName !== 'CoachTrackerPro'){
+        alert('❌ Fichier invalide — ce n\'est pas une sauvegarde Coach Tracker Pro.'); return;
+      }
+      var msg = '📥 Restaurer la sauvegarde du ' + (data.exportDate||'?') + ' ?\n\n';
+      msg += '✅ Sera restauré :\n• Effectif Club (joueurs, stats, santé)\n• Historique des matchs\n• Match en cours\n\n';
+      msg += '⚠️ Les données actuelles seront remplacées.';
+      if(!confirm(msg)) return;
+      if(data.ct_club) localStorage.setItem('ct_club', data.ct_club);
+      if(data.ct_match_history) localStorage.setItem('ct_match_history', data.ct_match_history);
+      try{ if(data.roster) roster = JSON.parse(data.roster); }catch(ex){}
+      try{ if(data.events) events = JSON.parse(data.events); }catch(ex){}
+      try{ if(data.substitutions) substitutions = JSON.parse(data.substitutions); }catch(ex){}
+      if(data.matchLocation) { matchLocation=data.matchLocation; updateLocationBadge(); setMatchLocationButtons(); }
+      if(data.scoreHome!==undefined){ scoreHome=data.scoreHome; document.getElementById('scoreHomeEl').textContent=scoreHome; }
+      if(data.scoreAway!==undefined){ scoreAway=data.scoreAway; document.getElementById('scoreAwayEl').textContent=scoreAway; }
+      if(data.currentFormat) currentFormat=data.currentFormat;
+      if(data.halfDuration) halfDuration=data.halfDuration;
+      renderRoster(); renderHistorique();
+      if(typeof initClubModule==='function') initClubModule();
+      alert('✅ Sauvegarde restaurée !\nEffectif et historique sont de retour.');
+    }catch(err){ alert('❌ Erreur import : '+err.message); }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+function setMatchLocationButtons(){
+  ['domicile','exterieur','neutre'].forEach(function(loc){
+    var btn = document.getElementById('loc-'+loc);
+    if(btn){ if(loc===matchLocation) btn.classList.add('sel'); else btn.classList.remove('sel'); }
   });
 }
+// ════════════════════════════════════════════════════════
 </script>
 </body>
 </html>
